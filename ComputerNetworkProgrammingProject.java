@@ -13,14 +13,18 @@ import javafx.scene.shape.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.action.Action;
+//import org.w3c.dom.Text;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
 
 public class ComputerNetworkProgrammingProject extends Application {
 
     Circle[] asteroids = new Circle[10];
+    PathTransition[] pathTransitions = new PathTransition[10];
     Polygon ship = new Polygon();
     boolean collision = false;
+    Group grp = new Group();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -29,7 +33,7 @@ public class ComputerNetworkProgrammingProject extends Application {
         stage.setTitle("Hello!");
         stage.setScene(scene);
 
-        Group grp = new Group();
+
         grp.getChildren().add(ship);
         player(scene);
         asteroid(grp);
@@ -54,8 +58,8 @@ public class ComputerNetworkProgrammingProject extends Application {
         s.setOnKeyPressed(event -> {
             switch (event.getCode())
             {
-                case S: if(ship.getLayoutY() < 340) ship.setLayoutY(ship.getLayoutY() + 5); checkCollision(); break;
-                case W: if(ship.getLayoutY() > -340) ship.setLayoutY(ship.getLayoutY() - 5); checkCollision(); break;
+                case S: if(ship.getLayoutY() < 340) ship.setLayoutY(ship.getLayoutY() + 5); break;
+                case W: if(ship.getLayoutY() > -340) ship.setLayoutY(ship.getLayoutY() - 5); break;
                 default: checkCollision(); break;
             }
         });
@@ -68,35 +72,33 @@ public class ComputerNetworkProgrammingProject extends Application {
         {
             asteroids[i] = new Circle();
             asteroids[i].setRadius(20);
-            asteroids[i].setCenterX((Math.random() * 1240) + 1200);
+            asteroids[i].setCenterX((Math.random() * 1240) + 600);
             asteroids[i].setCenterY(Math.random() * 720);
             asteroids[i].setFill(Color.BROWN);
             g.getChildren().add(asteroids[i]);
-            asteroidMovement(asteroids[i]);
+            asteroidMovement(asteroids[i], i);
         }
     }
 
-    public void asteroidMovement(Circle c)
+    public void asteroidMovement(Circle c, int i)
     {
         Path path = new Path();
         path.getElements().add(new MoveTo(c.getCenterX(),c.getCenterY()));
         path.getElements().add(new HLineTo(120));
 
-        PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.seconds(5));
-        pathTransition.setDelay(Duration.seconds(0));
-        pathTransition.setPath(path);
-        pathTransition.setNode(c);
-        pathTransition.setCycleCount(1);
-        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransition.setOnFinished(actionEvent -> checkCollision());
-        pathTransition.play();
-        if(c.getCenterX() == 0)
-        {
-            c.setCenterX(1240);
+        pathTransitions[i] = new PathTransition();
+        pathTransitions[i].setDuration(Duration.seconds(5));
+        pathTransitions[i].setDelay(Duration.seconds(0));
+        pathTransitions[i].setPath(path);
+        pathTransitions[i].setNode(c);
+        pathTransitions[i].setCycleCount(1);
+        pathTransitions[i].setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+        pathTransitions[i].setOnFinished(actionEvent -> {
+            checkCollision();
+            c.setCenterX((Math.random() * 1240) + 1200);
             c.setCenterY(Math.random() * 720);
-        }
-
+        });
+        pathTransitions[i].play();
     }
 
     public void checkCollision()
@@ -107,13 +109,28 @@ public class ComputerNetworkProgrammingProject extends Application {
             if(intersect.getBoundsInLocal().getWidth() != -1)
             {
                 collision = true;
+                break;
             }
         }
 
-        if(collision)
+        if(collision) //Stop all pathTransition when collision is true
         {
-            //pathTransition.stop();
-            System.out.println("Collision");
+            for(int i = 0; i < 10; i++)
+            {
+                pathTransitions[i].stop();
+            }
+            Text collisionText = new Text();
+            collisionText.setText("Ship collided with asteroid.");
+            collisionText.setX(600);
+            collisionText.setY(340);
+            grp.getChildren().add(collisionText);
+        }
+        else //Repeat pathTransition for asteroids when collision is false
+        {
+            for(int i = 0; i < 10; i++)
+            {
+                pathTransitions[i].play();
+            }
         }
     }
 
