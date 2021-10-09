@@ -1,4 +1,6 @@
-package compnetproject.computernetworkproject;
+package b451_Project;
+
+import b451_Project.Static.WindowProperties;
 
 import javafx.animation.PathTransition;
 import javafx.application.Application;
@@ -28,16 +30,16 @@ public class ComputerNetworkProgrammingProject extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        Group root = new Group();
-        Scene scene = new Scene(root, 1280, 720);
+        //Group root = new Group();
+        //Scene scene = new Scene(root, 1280, 720);
         stage.setTitle("Hello!");
-        stage.setScene(scene);
+        //stage.setScene(scene);
+        stage.setScene(WindowProperties.MainMenuScene.getScene());
 
-
-        grp.getChildren().add(ship);
-        player(scene);
-        asteroid(grp);
-        scene.setRoot(grp);
+        //grp.getChildren().add(ship);
+        //player(scene);
+        //asteroid(grp);
+        //scene.setRoot(grp);
         stage.show();
 
 
