@@ -1,5 +1,6 @@
 package b451_Project;
 
+import b451_Project.Scenes.SceneBase;
 import b451_Project.Static.WindowProperties;
 
 import javafx.animation.PathTransition;
@@ -28,21 +29,49 @@ public class ComputerNetworkProgrammingProject extends Application {
     boolean collision = false;
     Group grp = new Group();
 
+    private SceneBase currentScene = null;
+
     @Override
     public void start(Stage stage) throws IOException {
+
+        WindowProperties.stage = stage;
+        stage.setTitle("Hello!");
+        stage.setResizable(false);
+        switchScene(WindowProperties.MainMenuScene);
+        stage.show();
+
         //Group root = new Group();
         //Scene scene = new Scene(root, 1280, 720);
-        stage.setTitle("Hello!");
         //stage.setScene(scene);
-        stage.setScene(WindowProperties.MainMenuScene.getScene());
-
         //grp.getChildren().add(ship);
         //player(scene);
         //asteroid(grp);
         //scene.setRoot(grp);
-        stage.show();
 
 
+
+    }
+
+    @Override
+    public void stop()
+    {
+        currentScene.disable();
+    }
+
+    /**
+     * switch stage scene
+     * @param s target scene
+     * */
+    private void switchScene(SceneBase s)
+    {
+        if(currentScene != null)
+        {
+            currentScene.disable();
+        }
+
+        currentScene = s;
+        WindowProperties.stage.setScene(currentScene.getScene());
+        s.enable();
     }
 
     public void player(Scene s) throws IOException

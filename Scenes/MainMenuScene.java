@@ -1,19 +1,19 @@
 package b451_Project.Scenes;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-
+import b451_Project.Static.*;
+import javafx.scene.text.TextAlignment;
 
 // this is the main menu scene of the game
 
-public class MainMenuScene implements SceneBase {
+public class MainMenuScene extends SceneBase {
 
-    private Scene scene = null;
-    private Pane pane = null;
-
-    private Button quitButton = null;
     private Button joinButton = null;
     private Button hostGameButton = null;
 
@@ -28,34 +28,63 @@ public class MainMenuScene implements SceneBase {
 
     public MainMenuScene()
     {
-        //init pane, scene, text-field and buttons
-        pane = new Pane();
-        scene = new Scene(pane);
-        quitButton = new Button("Quit");
+
+        //init pane, text-field and buttons
         joinButton = new Button("Join a Game");
         hostGameButton = new Button("Host a Game");
         ipTextField = new TextField();
         ipLabel = new Label("Ip: ");
 
-        //add size changed event listener
-        scene.widthProperty().addListener((observable, oldValue, newValue) ->
-        {
-            //relocate components
-        });
-
-        scene.heightProperty().addListener((observable, oldValue, newValue) ->
-        {
-            //relocate components
-
-
-        });
-
-        //add host game, join game and quit buttons to pane
-        //add a textbox to enter ip address to pane
-        pane.getChildren().add(quitButton);
+        //add host game, join game buttons to pane
+        //add a text-field to enter ip address to pane
         pane.getChildren().add(joinButton);
         pane.getChildren().add(hostGameButton);
         pane.getChildren().add(ipTextField);
+        pane.getChildren().add(ipLabel);
     }
+
+    @Override
+    protected void sceneSizeChanged(double w, double h) {
+
+        //relocate text-field
+        ipTextField.setLayoutX(w * 0.35);
+        ipTextField.setLayoutY(h * 0.32);
+        ipTextField.setPrefWidth(w * 0.3);
+        ipTextField.setPrefHeight(h * 0.05);
+
+        //relocate label
+        ipLabel.setLayoutX(w * 0.3);
+        ipLabel.setLayoutY(h * 0.32);
+        ipLabel.setPrefWidth(w * 0.05);
+        ipLabel.setPrefHeight(h * 0.05);
+
+        //relocate buttons
+        joinButton.setLayoutX(w * 0.4);
+        joinButton.setLayoutY(h * 0.4);
+        joinButton.setPrefWidth( w * 0.2);
+        joinButton.setPrefHeight(h * 0.05);
+
+        hostGameButton.setLayoutX( w * 0.4);
+        hostGameButton.setLayoutY(h * 0.45);
+        hostGameButton.setPrefWidth(w * 0.2);
+        hostGameButton.setPrefHeight(h * 0.05);
+
+    }
+
+    @Override
+    protected void sceneMouseEvent(double posX, double posY, boolean p) {
+
+    }
+
+    @Override
+    protected void sceneRedraw(double deltaT) {
+
+    }
+
+    @Override
+    protected void sceneKeyEvent(KeyCode k, boolean p) {
+
+    }
+
 
 }
