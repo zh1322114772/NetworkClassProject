@@ -24,8 +24,11 @@ import java.io.IOException;
 public class ComputerNetworkProgrammingProject extends Application {
 
     Circle[] asteroids = new Circle[10];
-    PathTransition[] pathTransitions = new PathTransition[10];
+    PathTransition[] asteroidPath = new PathTransition[10];
     Polygon ship = new Polygon();
+    int velocity = 2;
+    int acceleration = 2;
+    KeyCode key = KeyCode.W; //Used to check for previous button press
     boolean collision = false;
     Group grp = new Group();
 
@@ -89,9 +92,22 @@ public class ComputerNetworkProgrammingProject extends Application {
         s.setOnKeyPressed(event -> {
             switch (event.getCode())
             {
-                case S: if(ship.getLayoutY() < 340) ship.setLayoutY(ship.getLayoutY() + 5); break;
-                case W: if(ship.getLayoutY() > -340) ship.setLayoutY(ship.getLayoutY() - 5); break;
-                default: checkCollision(); break;
+                case S:
+                    if(key != event.getCode()) velocity = 2; //Reset velocity to 2 if the ship changes direction.
+                    if(ship.getLayoutY() < 340) {
+                        ship.setLayoutY(ship.getLayoutY() + velocity);
+                        velocity = (velocity+acceleration > 20)?20:velocity+acceleration; //Set velocity limit to 20
+                    }
+                    key = event.getCode();
+                    break;
+                case W:
+                    if(key != event.getCode()) velocity = 2;
+                    if(ship.getLayoutY() > -340) {
+                        ship.setLayoutY(ship.getLayoutY() - velocity);
+                        velocity = (velocity+acceleration > 20)?20:velocity+acceleration;
+                    }
+                    key = event.getCode();
+                    break;
             }
         });
     }
@@ -111,25 +127,24 @@ public class ComputerNetworkProgrammingProject extends Application {
         }
     }
 
-    public void asteroidMovement(Circle c, int i)
+    public void asteroidMovement(Circle ast, int i)
     {
         Path path = new Path();
-        path.getElements().add(new MoveTo(c.getCenterX(),c.getCenterY()));
+        path.getElements().add(new MoveTo(ast.getCenterX(),ast.getCenterY()));
         path.getElements().add(new HLineTo(120));
 
-        pathTransitions[i] = new PathTransition();
-        pathTransitions[i].setDuration(Duration.seconds(5));
-        pathTransitions[i].setDelay(Duration.seconds(0));
-        pathTransitions[i].setPath(path);
-        pathTransitions[i].setNode(c);
-        pathTransitions[i].setCycleCount(1);
-        pathTransitions[i].setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransitions[i].setOnFinished(actionEvent -> {
+        asteroidPath[i] = new PathTransition();
+        asteroidPath[i].setDuration(Duration.seconds(Math.random()*5 + 3));
+        asteroidPath[i].setDelay(Duration.seconds(0));
+        asteroidPath[i].setPath(path);
+        asteroidPath[i].setNode(ast);
+        asteroidPath[i].setCycleCount(1);
+        asteroidPath[i].setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+        asteroidPath[i].setOnFinished(actionEvent -> {
             checkCollision();
-            c.setCenterX((Math.random() * 1240) + 1200);
-            c.setCenterY(Math.random() * 720);
+            if(!collision) asteroidPath[i].play();
         });
-        pathTransitions[i].play();
+        asteroidPath[i].play();
     }
 
     public void checkCollision()
@@ -155,13 +170,6 @@ public class ComputerNetworkProgrammingProject extends Application {
             collisionText.setX(600);
             collisionText.setY(340);
             grp.getChildren().add(collisionText);
-        }
-        else //Repeat pathTransition for asteroids when collision is false
-        {
-            for(int i = 0; i < 10; i++)
-            {
-                pathTransitions[i].play();
-            }
         }
     }
 
