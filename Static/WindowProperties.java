@@ -1,4 +1,5 @@
 package b451_Project.Static;
+import b451_Project.ComputerNetworkProgrammingProject;
 import b451_Project.Scenes.GameScene;
 import b451_Project.Scenes.MainMenuScene;
 import b451_Project.Scenes.SceneBase;
@@ -13,7 +14,7 @@ public class WindowProperties {
 
     public static SceneBase GameScene = new GameScene();
 
-    public static Stage stage = null;
+    public static ComputerNetworkProgrammingProject game = null;
 
     public static final int WINDOW_WIDTH = 1280;
 

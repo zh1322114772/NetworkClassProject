@@ -16,15 +16,8 @@ public class MainMenuScene extends SceneBase {
 
     private Button joinButton = null;
     private Button hostGameButton = null;
-
     private TextField ipTextField = null;
     private Label ipLabel = null;
-
-    @Override
-    public Scene getScene() {
-        return scene;
-    }
-
 
     public MainMenuScene()
     {
@@ -68,6 +61,13 @@ public class MainMenuScene extends SceneBase {
         hostGameButton.setLayoutY(h * 0.45);
         hostGameButton.setPrefWidth(w * 0.2);
         hostGameButton.setPrefHeight(h * 0.05);
+
+        //when user click host a game
+        hostGameButton.setOnAction((e) ->
+        {
+            WindowProperties.game.switchScene(WindowProperties.GameScene);
+        });
+
 
     }
 

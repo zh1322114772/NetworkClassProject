@@ -171,7 +171,7 @@ public abstract class SceneBase {
      * get javafx scene instance
      * @return scene
      */
-    public Scene getScene()
+    final public Scene getScene()
     {
         return scene;
     }

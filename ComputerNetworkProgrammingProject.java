@@ -30,11 +30,16 @@ public class ComputerNetworkProgrammingProject extends Application {
     Group grp = new Group();
 
     private SceneBase currentScene = null;
+    private Stage stage = null;
+
 
     @Override
     public void start(Stage stage) throws IOException {
 
-        WindowProperties.stage = stage;
+        this.stage = stage;
+        WindowProperties.game = this;
+
+        //init window
         stage.setTitle("Hello!");
         stage.setResizable(false);
         switchScene(WindowProperties.MainMenuScene);
@@ -62,7 +67,7 @@ public class ComputerNetworkProgrammingProject extends Application {
      * switch stage scene
      * @param s target scene
      * */
-    private void switchScene(SceneBase s)
+    public void switchScene(SceneBase s)
     {
         if(currentScene != null)
         {
@@ -70,8 +75,9 @@ public class ComputerNetworkProgrammingProject extends Application {
         }
 
         currentScene = s;
-        WindowProperties.stage.setScene(currentScene.getScene());
+        stage.setScene(currentScene.getScene());
         s.enable();
+
     }
 
     public void player(Scene s) throws IOException
