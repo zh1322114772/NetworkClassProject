@@ -1,26 +1,25 @@
-package b451_Project.Scenes;
+package b451_Project.scenes;
 
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import b451_Project.render.RenderFactory;
+import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
-import javafx.scene.shape.Circle;
 
 //this scene displays game content
 public class GameScene extends SceneBase {
 
-    Circle asd = null;
+    private RenderFactory renderFactory;
+    float order = 100;
 
     public GameScene()
     {
-        asd = new Circle(20);
-        pane.getChildren().add(asd);
+
     }
 
     @Override
     public void enable()
     {
+        renderFactory = new RenderFactory(this.pane);
         super.enable();
-
 
     }
 
@@ -44,7 +43,12 @@ public class GameScene extends SceneBase {
 
     @Override
     protected void sceneRedraw(double deltaT) {
-        asd.setCenterX(100);
+
+        Platform.runLater(() ->
+        {
+            renderFactory.render(deltaT);
+        });
+
     }
 
     @Override

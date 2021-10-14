@@ -1,4 +1,4 @@
-package b451_Project.Static;
+package b451_Project.global;
 
 public class GameVariables {
 

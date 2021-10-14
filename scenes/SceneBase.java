@@ -1,6 +1,6 @@
-package b451_Project.Scenes;
+package b451_Project.scenes;
 import javafx.scene.*;
-import b451_Project.Static.WindowProperties;
+import b451_Project.global.WindowProperties;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 

@@ -1,21 +1,16 @@
 package b451_Project;
 
-import b451_Project.Scenes.SceneBase;
-import b451_Project.Static.WindowProperties;
+import b451_Project.scenes.SceneBase;
+import b451_Project.global.WindowProperties;
 
 import javafx.animation.PathTransition;
 import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.controlsfx.control.action.Action;
 //import org.w3c.dom.Text;
 import javafx.scene.text.Text;
 

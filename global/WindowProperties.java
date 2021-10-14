@@ -1,9 +1,8 @@
-package b451_Project.Static;
+package b451_Project.global;
 import b451_Project.ComputerNetworkProgrammingProject;
-import b451_Project.Scenes.GameScene;
-import b451_Project.Scenes.MainMenuScene;
-import b451_Project.Scenes.SceneBase;
-import javafx.stage.Stage;
+import b451_Project.scenes.GameScene;
+import b451_Project.scenes.MainMenuScene;
+import b451_Project.scenes.SceneBase;
 
 public class WindowProperties {
 
