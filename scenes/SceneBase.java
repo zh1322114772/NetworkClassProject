@@ -1,6 +1,7 @@
 package b451_Project.scenes;
+import b451_Project.utils.Timer;
 import javafx.scene.*;
-import b451_Project.global.WindowProperties;
+import b451_Project.global.WindowVariables;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
@@ -9,15 +10,14 @@ public abstract class SceneBase {
 
     protected Scene scene;
     protected Pane pane;
-    private Thread repaintThread;
-    private volatile  boolean threadFlag;
     private boolean mousePressed = false;
-
+    private Timer timer;
 
     public SceneBase()
     {
+        timer = new Timer(true);
         pane = new Pane();
-        scene = new Scene(pane, WindowProperties.WINDOW_WIDTH, WindowProperties.WINDOW_HEIGHT);
+        scene = new Scene(pane, WindowVariables.WINDOW_WIDTH, WindowVariables.WINDOW_HEIGHT);
 
         //size changed listener
         scene.widthProperty().addListener((observable, oldValue, newValue) ->
@@ -91,42 +91,19 @@ public abstract class SceneBase {
     public void enable()
     {
         //start repaint thread
-        threadFlag = true;
-        long desiredFrameTimeNano = 1000000000 / WindowProperties.WINDOW_FRAME_RATE;
-
-        repaintThread = new Thread(()->
+        timer.start((deltaT) ->
         {
-            //time interval between two frames
-            long time0 = System.nanoTime();
-            long time1 = time0;
-            long deltaTNano = 0;
-
-            long waitTime = 0;
-            //refresh scene at constant rate
-           while(threadFlag)
-           {
-               waitTime = System.nanoTime();
-               synchronized (this)
-               {
-                   time0 = System.nanoTime();
-                   deltaTNano = time0 - time1;
-                   sceneRedraw((double)deltaTNano/ 1000000000.0);
-                   time1 = time0;
-               }
-
-               //busy wait till desired frame time, then render next frame
-               waitTime = System.nanoTime() - waitTime;
-               waitTime =  desiredFrameTimeNano - waitTime + System.nanoTime();
-               while(waitTime > System.nanoTime()) {};
-           }
-        });
+            synchronized (this)
+            {
+                sceneRedraw(deltaT);
+            }
+        }, 1.0 / WindowVariables.WINDOW_FRAME_RATE);
 
         synchronized (this)
         {
             sceneSizeChanged(scene.getWidth(), scene.getHeight());
         }
 
-        repaintThread.start();
     }
 
     /** this disable method will be called when stage change from this instance scene to other instance scene
@@ -135,7 +112,7 @@ public abstract class SceneBase {
     public void disable()
     {
         //stop repaint thread
-        threadFlag = false;
+        timer.stop();
     }
 
     /**

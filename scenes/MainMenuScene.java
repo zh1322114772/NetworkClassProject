@@ -60,7 +60,7 @@ public class MainMenuScene extends SceneBase {
         //when user click host a game
         hostGameButton.setOnAction((e) ->
         {
-            WindowProperties.game.switchScene(WindowProperties.GameScene);
+            WindowVariables.game.switchScene(WindowVariables.GameScene);
         });
 
 

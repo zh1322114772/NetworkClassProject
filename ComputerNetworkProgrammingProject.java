@@ -1,7 +1,7 @@
 package b451_Project;
 
 import b451_Project.scenes.SceneBase;
-import b451_Project.global.WindowProperties;
+import b451_Project.global.WindowVariables;
 
 import javafx.animation.PathTransition;
 import javafx.application.Application;
@@ -32,12 +32,12 @@ public class ComputerNetworkProgrammingProject extends Application {
     public void start(Stage stage) throws IOException {
 
         this.stage = stage;
-        WindowProperties.game = this;
+        WindowVariables.game = this;
 
         //init window
         stage.setTitle("Hello!");
         stage.setResizable(false);
-        switchScene(WindowProperties.MainMenuScene);
+        switchScene(WindowVariables.MainMenuScene);
         stage.show();
 
         //Group root = new Group();

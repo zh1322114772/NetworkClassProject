@@ -4,10 +4,10 @@ import b451_Project.scenes.GameScene;
 import b451_Project.scenes.MainMenuScene;
 import b451_Project.scenes.SceneBase;
 
-public class WindowProperties {
+public class WindowVariables {
 
     //avoid new instance
-    private WindowProperties(){}
+    private WindowVariables(){}
 
     public static SceneBase MainMenuScene = new MainMenuScene();
 
