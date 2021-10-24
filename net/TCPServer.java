@@ -1,16 +1,12 @@
 package b451_Project.net;
 import b451_Project.global.ConfigVariables;
+import b451_Project.net.packets.HelloPacket;
 import b451_Project.net.packets.PacketBase;
 import b451_Project.utils.Timer;
-
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Random;
-
 
 /**
  * This class wrap the ServerScoket
@@ -20,13 +16,10 @@ public abstract class TCPServer {
 
     //client socket list
     private ServerSocket server;
-    private ArrayList<Socket> clientSockets = new ArrayList<Socket>();
-    private ArrayList<ObjectOutputStream> socketPacketSender = new ArrayList<ObjectOutputStream>();
-    private ArrayList<ObjectInputStream> socketPacketReceiver = new ArrayList<ObjectInputStream>();
+    private ArrayList<SocketWrapper> clientSockets = new ArrayList<SocketWrapper>();
     private ArrayList<Long> clientTimestamp = new ArrayList<Long>();
 
     private Thread connectionListenThread = new Thread();
-    private Timer dataReceiveThread = new Timer(false);
     private Timer loopThread = new Timer(false);
 
     private volatile boolean threadFlag = true;
@@ -48,10 +41,8 @@ public abstract class TCPServer {
                     int handle;
                     synchronized (this)
                     {
-                        //establish encrypted connection
-                        clientSockets.add(client);
-                        socketPacketSender.add(new ObjectOutputStream(client.getOutputStream()));
-                        socketPacketReceiver.add(new ObjectInputStream(client.getInputStream()));
+                        //establish connection
+                        clientSockets.add(new SocketWrapper(client));
                         clientTimestamp.add(System.currentTimeMillis());
                         handle = clientSockets.size() - 1;
                         clientConnected(handle);
@@ -63,63 +54,48 @@ public abstract class TCPServer {
                 }
 
             }
+
         });
         connectionListenThread.start();
 
-        //heartbeat packet check thread
+        //server tick loop thread
         loopThread.start((d)->
         {
             long currentMS = System.currentTimeMillis();
             synchronized (this)
             {
-                //check timeout
+                //check new arrival packets from clients
+                for(int i = 0; i < clientSockets.size(); i++)
+                {
+                    while(clientSockets.get(i).available())
+                    {
+                        //avoid hello packet
+                        PacketBase p = clientSockets.get(i).getData();
+                        if(!(p instanceof HelloPacket))
+                        {
+                            packetReceived(p, i);
+                        }
+                    }
+
+                    //update client timestamp
+                    clientTimestamp.set(i, System.currentTimeMillis());
+                }
+
+                //client timeout check
                 for(int i = clientTimestamp.size() - 1; i>=0; i--)
                 {
                     if((currentMS - clientTimestamp.get(i).longValue()) > ConfigVariables.CONNECTION_TIMEOUT)
                     {
                         clientDisconnected(i);
-
                         //force close socket
-                        while(!clientSockets.get(i).isClosed())
-                        {
-                            try
-                            {
-                                clientSockets.get(i).close();
-                            }catch (Exception e)
-                            {
-
-                            }
-                        }
-
+                        disconnect(i);
                     }
 
-                    //remove closed client from list
-                    clientSockets.remove(i);
-                    clientTimestamp.remove(i);
-                    socketPacketReceiver.remove(i);
-                    socketPacketSender.remove(i);
                 }
 
+                tick(d);
             }
-        }, 1.0/ConfigVariables.GAME_TICK_RATE);
 
-        //receive data from client
-        dataReceiveThread.start((d)->
-        {
-            synchronized (this) {
-                for (int i = 0; i < clientSockets.size(); i++) {
-                    try {
-                        Object o = socketPacketReceiver.get(i).readObject();
-                        if (o instanceof PacketBase) {
-                            //update client timestamp
-                            clientTimestamp.set(i, System.currentTimeMillis());
-                            packetReceived((PacketBase)o, i);
-                        }
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
         }, 1.0/ConfigVariables.GAME_TICK_RATE);
 
     }
@@ -128,12 +104,31 @@ public abstract class TCPServer {
     /**
      * stop server
      * */
-    public void stop() throws IOException
+    public void stop()
     {
-        threadFlag = false;
-        loopThread.stop();
-        dataReceiveThread.stop();
+        try
+        {
+            threadFlag = false;
+            server.close();
+            loopThread.stop();
+        }
+        catch(Exception e)
+        {
+
+        }
     }
+
+    @Override
+    public void finalize()
+    {
+        stop();
+    }
+
+    /**
+     * server tick callback event
+     * @param d delta t
+     * */
+    protected abstract void tick(double d);
 
     /**
      * client connection established callback
@@ -155,6 +150,25 @@ public abstract class TCPServer {
     protected abstract void packetReceived(PacketBase p, int handle);
 
     /**
+     * disconnect a client
+     * @param handle client handle
+     *
+     * */
+    public void disconnect(int handle)
+    {
+        synchronized (this)
+        {
+            if(handle < clientSockets.size())
+            {
+                clientSockets.get(handle).close();
+                clientSockets.remove(handle);
+                clientTimestamp.remove(handle);
+            }
+        }
+    }
+
+
+    /**
      * send a packet to a client
      * @param handle client handle
      * */
@@ -162,20 +176,18 @@ public abstract class TCPServer {
     {
         synchronized (this)
         {
-            if(handle < socketPacketSender.size())
+            if(handle < clientSockets.size())
             {
                 try
                 {
-                    socketPacketSender.get(handle).writeObject(p);
+                    clientSockets.get(handle).sendPacket(p);
                     return true;
                 }catch(IOException e)
                 {
 
                 }
-
             }
             return false;
         }
     }
-
 }

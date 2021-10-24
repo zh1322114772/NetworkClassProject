@@ -43,7 +43,6 @@ public class GameScene extends SceneBase {
 
     @Override
     protected void sceneRedraw(double deltaT) {
-        System.out.println(deltaT);
         Platform.runLater(() ->
         {
             renderFactory.render(deltaT);

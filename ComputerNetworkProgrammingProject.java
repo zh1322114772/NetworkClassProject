@@ -1,5 +1,6 @@
 package b451_Project;
 
+import b451_Project.global.GameVariables;
 import b451_Project.scenes.SceneBase;
 import b451_Project.global.WindowVariables;
 
@@ -56,6 +57,17 @@ public class ComputerNetworkProgrammingProject extends Application {
     public void stop()
     {
         currentScene.disable();
+
+        //stop client and server
+        if(GameVariables.server != null)
+        {
+            GameVariables.server.stop();
+        }
+
+        if(GameVariables.client != null)
+        {
+            GameVariables.client.stop();
+        }
     }
 
     /**

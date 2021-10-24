@@ -1,9 +1,14 @@
 package b451_Project.scenes;
+import b451_Project.net.GameClient;
+import b451_Project.net.GameServer;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import b451_Project.global.*;
+
+import java.io.IOException;
 
 // this is the main menu scene of the game
 
@@ -60,7 +65,34 @@ public class MainMenuScene extends SceneBase {
         //when user click host a game
         hostGameButton.setOnAction((e) ->
         {
-            WindowVariables.game.switchScene(WindowVariables.GameScene);
+            //run server
+            if(GameVariables.server != null)
+            {
+                GameVariables.server.stop();
+            }
+
+            try
+            {
+                GameVariables.server = new GameServer();
+                try
+                {
+                    GameVariables.client = new GameClient("127.0.0.1");
+
+                    //switch scene
+                    WindowVariables.game.switchScene(WindowVariables.GameScene);
+
+                }catch(IOException ex)
+                {
+                    GameVariables.server.stop();
+                    WindowMsgBox.ErrorMessage("Unable to connect the Server", ex.getMessage());
+                }
+
+
+            }catch(IOException ex)
+            {
+                WindowMsgBox.ErrorMessage("Unable to run the Server", ex.getMessage());
+            }
+
         });
 
 
