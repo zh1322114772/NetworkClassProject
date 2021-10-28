@@ -7,5 +7,5 @@ import java.util.ArrayList;
  * this packet is sent by server to clients to update entity locations
  * */
 public class TickPacket implements PacketBase{
-    ArrayList<Entity> entities;
+    public ArrayList<Entity> entities;
 }

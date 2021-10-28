@@ -6,6 +6,7 @@ import b451_Project.global.WindowVariables;
 
 import javafx.animation.PathTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
@@ -76,15 +77,17 @@ public class ComputerNetworkProgrammingProject extends Application {
      * */
     public void switchScene(SceneBase s)
     {
-        if(currentScene != null)
+        Platform.runLater(() ->
         {
-            currentScene.disable();
-        }
+            if(currentScene != null)
+            {
+                currentScene.disable();
+            }
 
-        currentScene = s;
-        stage.setScene(currentScene.getScene());
-        s.enable();
-
+            currentScene = s;
+            stage.setScene(currentScene.getScene());
+            s.enable();
+        });
     }
 
     public void player(Scene s) throws IOException

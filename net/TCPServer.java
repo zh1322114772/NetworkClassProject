@@ -50,7 +50,8 @@ public abstract class TCPServer {
 
                 }catch(IOException e)
                 {
-
+                    System.out.println(e);
+                    e.printStackTrace();
                 }
 
             }
@@ -114,7 +115,8 @@ public abstract class TCPServer {
         }
         catch(Exception e)
         {
-
+            System.out.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -184,7 +186,8 @@ public abstract class TCPServer {
                     return true;
                 }catch(IOException e)
                 {
-
+                    System.out.println(e);
+                    e.printStackTrace();
                 }
             }
             return false;

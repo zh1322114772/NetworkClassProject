@@ -1,6 +1,7 @@
 package b451_Project.scenes;
 import b451_Project.net.GameClient;
 import b451_Project.net.GameServer;
+import b451_Project.net.packets.JoinPacket;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -77,20 +78,19 @@ public class MainMenuScene extends SceneBase {
                 try
                 {
                     GameVariables.client = new GameClient("127.0.0.1");
-
-                    //switch scene
-                    WindowVariables.game.switchScene(WindowVariables.GameScene);
+                    //send join request
+                    GameVariables.client.sendPacket(new JoinPacket());
 
                 }catch(IOException ex)
                 {
                     GameVariables.server.stop();
-                    WindowMsgBox.ErrorMessage("Unable to connect the Server", ex.getMessage());
+                    WindowMsgBox.InfoMessage("Unable to connect the Server", ex.getMessage());
                 }
 
 
             }catch(IOException ex)
             {
-                WindowMsgBox.ErrorMessage("Unable to run the Server", ex.getMessage());
+                WindowMsgBox.InfoMessage("Unable to run the Server", ex.getMessage());
             }
 
         });

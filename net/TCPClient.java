@@ -36,16 +36,7 @@ public abstract class TCPClient {
                 //check if it's necessary to send the hello packet
                 if(System.currentTimeMillis() - timeStamp > halfTimeOut)
                 {
-                    try
-                    {
-                        sendPacket(new HelloPacket());
-                    }catch (IOException e)
-                    {
-                        //unable to communicate with server
-                        disconnected();
-                        stop();
-                    }
-
+                    sendPacket(new HelloPacket());
                 }
             }
 
@@ -72,12 +63,22 @@ public abstract class TCPClient {
      * send a new packet
      * @param p packet
      * */
-    public void sendPacket(PacketBase p) throws IOException
+    public void sendPacket(PacketBase p)
     {
         synchronized (this)
         {
-            client.sendPacket(p);
-            timeStamp = System.currentTimeMillis();
+            try
+            {
+                client.sendPacket(p);
+                timeStamp = System.currentTimeMillis();
+            }catch(IOException e)
+            {
+                System.out.println(e);
+                e.printStackTrace();
+                //unable to communicate with server
+                disconnected();
+                stop();
+            }
         }
 
     }
