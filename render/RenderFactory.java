@@ -1,4 +1,5 @@
 package b451_Project.render;
+import b451_Project.global.ConfigVariables;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -22,6 +23,7 @@ public class RenderFactory {
         // set this variable to -1 to indicate no time limit
         public float lifeSpan;
         //set the object position update interval in second
+        //set to -1 to indicate update per frame
         public float objectUpdateInterval;
         public float objectIntervalCounter = 0;
 
@@ -50,14 +52,18 @@ public class RenderFactory {
     }
 
     private ArrayList<RenderableObjectWrapper<Polygon>> polygons;
+    private ArrayList<RenderableObjectWrapper<ParticleGenerator>> particles;
     private Queue<Integer> polygonRecycleList;
+    private Queue<Integer> particleRecycleList;
     private Pane pane;
 
     public RenderFactory(Pane p)
     {
         this.pane = p;
         polygons = new ArrayList<RenderableObjectWrapper<Polygon>>();
+        particles = new ArrayList<RenderableObjectWrapper<ParticleGenerator>>();
         polygonRecycleList = new LinkedList<Integer>();
+        particleRecycleList = new LinkedList<Integer>();
     }
 
     /**
@@ -131,14 +137,14 @@ public class RenderFactory {
     /**
      * set the rotation in degrees of the polygon
      * @param polygonID polygon id
-     * @param rad radian
+     * @param deg degree
      * */
-    public synchronized void setPolygonRotation(int polygonID, float rad)
+    public synchronized void setPolygonRotation(int polygonID, float deg)
     {
         if(polygonID < polygons.size() && polygonID >= 0)
         {
             RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
-            polygon.newRotate = rad;
+            polygon.newRotate = deg;
         }
     }
 
@@ -168,6 +174,83 @@ public class RenderFactory {
         {
             RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
             polygon.lifeSpan = 0;
+        }
+    }
+
+    /**
+     * generate a new instance of particle generator
+     * @param generateInterval time interval to generate a new particle
+     * @param direction particle shooting direction (in degrees)
+     * @param dRange random direction range, that is set particle's direction within range of random(direction-dRange, direction + dRange)
+     * @param velocity particle initial velocity
+     * @param vRange random velocity range, that is set particle's initial velocity within range of random(velocity - vRange, velocity + vRange)
+     * @param color particle color
+     * @param particleLifeSpan particle survival time in seconds
+     * @param generatorLifeSpan particle generator life span, set -1 to unlimited time
+     * @param x particle generator x location
+     * @param y particle generator y location
+     * @param friction particle friction
+     * @param orderView z-depth value
+     * */
+    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, int orderView)
+    {
+        ParticleGenerator p = new ParticleGenerator(generateInterval, direction, dRange, velocity, vRange, color, particleLifeSpan, x, y, friction, orderView, this);
+        RenderableObjectWrapper<ParticleGenerator> rp = new RenderableObjectWrapper<ParticleGenerator>(p, generatorLifeSpan, 1.0f/ ConfigVariables.GAME_TICK_RATE);
+
+        rp.newX = x;
+        rp.newY =y;
+        rp.intX = x;
+        rp.intY = y;
+        rp.oldX = x;
+        rp.oldY = y;
+        rp.oldRotate = direction;
+        rp.intRotate = direction;
+        rp.newRotate = direction;
+
+        particles.add(rp);
+        return particles.size() - 1;
+    }
+
+    /**
+     * set particle generator direction
+     * @param generatorID particle generator id
+     * */
+    public synchronized void setParticleGeneratorRotation(int generatorID, float deg)
+    {
+        if(generatorID < particles.size() && generatorID >= 0)
+        {
+            RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+            p.newRotate = deg;
+        }
+    }
+
+    /**
+     * set particle generator location
+     * @param generatorID particle generator id
+     * @param x particle generator x location
+     * @param y particle generator y location
+     * */
+    public synchronized void setParticleGeneratorLocation(int generatorID, float x, float y)
+    {
+        if(generatorID < particles.size() && generatorID >= 0)
+        {
+            RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+            p.newX = x;
+            p.newY = y;
+        }
+    }
+
+    /**
+     * destroy a particle generator
+     * @param generatorID generator id
+     * */
+    public synchronized void setParticleGeneratorDestroy(int generatorID)
+    {
+        if(generatorID < particles.size() && generatorID >= 0)
+        {
+            RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+            p.lifeSpan = 0;
+            p.obj.setDestroy();
         }
     }
 
@@ -219,6 +302,11 @@ public class RenderFactory {
                 }
 
             }
+
+            //render all particles
+
+
         });
     }
+
 }
