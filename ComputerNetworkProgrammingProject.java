@@ -39,7 +39,7 @@ public class ComputerNetworkProgrammingProject extends Application {
         //init window
         stage.setTitle("Hello!");
         stage.setResizable(false);
-        switchScene(WindowVariables.MainMenuScene);
+        switchScene(WindowVariables.mainMenuScene);
         stage.show();
 
         //Group root = new Group();

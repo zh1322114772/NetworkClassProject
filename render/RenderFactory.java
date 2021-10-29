@@ -1,4 +1,5 @@
 package b451_Project.render;
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
@@ -67,7 +68,7 @@ public class RenderFactory {
      * @param vertices number of vertex points of the polygon
      * @param rad polygon radius
      * @param viewOrder set z-depth value of the polygon
-     * @param rotate rotate polygon in radian
+     * @param rotate rotate polygon in degree
      * @param x polygon x center location
      * @param y polygon y center location
      * @return polygon ID
@@ -120,13 +121,15 @@ public class RenderFactory {
 
         polygon.obj.getPoints().addAll(v);
         polygon.obj.setFill(c);
-        pane.getChildren().add(polygon.obj);
-
+        Platform.runLater(() ->
+        {
+            pane.getChildren().add(polygon.obj);
+        });
         return id;
     }
 
     /**
-     * set the rotation in radians of the polygon
+     * set the rotation in degrees of the polygon
      * @param polygonID polygon id
      * @param rad radian
      * */
@@ -174,57 +177,48 @@ public class RenderFactory {
      * */
     public synchronized void render(double deltaT)
     {
-
-        //render all polygons
-        for(RenderableObjectWrapper<Polygon> p : polygons)
+        Platform.runLater(() ->
         {
-            //update lifespan
-            if(p.lifeSpan != -1)
-            {
-                p.lifeSpan -= deltaT;
-                //recycle polygon
-                if(p.lifeSpan <=0)
-                {
-                    p.lifeSpan = 0;
-                    pane.getChildren().remove(p.obj);
-                    continue;
-                }
-            }
-
-            //update location and rotation
-            if(p.objectUpdateInterval == -1)
-            {
-                p.obj.setLayoutX(p.newX);
-                p.obj.setLayoutY(p.newY);
-                p.obj.setRotate(p.newRotate);
-
-            }else
-            {
-                //make animation between last and newest point
-                p.objectIntervalCounter += deltaT;
-                if(p.objectIntervalCounter >= p.objectUpdateInterval)
-                {
-                    p.objectIntervalCounter %= p.objectUpdateInterval;
-                    p.oldRotate = p.intRotate;
-                    p.oldX = p.intX;
-                    p.oldY = p.intY;
-
-                    p.intRotate = p.newRotate;
-                    p.intX = p.newX;
-                    p.intY = p.newY;
+            //render all polygons
+            for (RenderableObjectWrapper<Polygon> p : polygons) {
+                //update lifespan
+                if (p.lifeSpan != -1) {
+                    p.lifeSpan -= deltaT;
+                    //recycle polygon
+                    if (p.lifeSpan <= 0) {
+                        p.lifeSpan = 0;
+                        pane.getChildren().remove(p.obj);
+                        continue;
+                    }
                 }
 
-                //linear animation
-                p.obj.setLayoutX(p.oldX + ((p.intX - p.oldX) * (p.objectIntervalCounter/p.objectUpdateInterval)));
-                p.obj.setLayoutY(p.oldY + ((p.intY - p.oldY) * (p.objectIntervalCounter/p.objectUpdateInterval)));
-                p.obj.setRotate(p.oldRotate + ((p.intRotate - p.oldRotate) * (p.objectIntervalCounter/p.objectUpdateInterval)));
+                //update location and rotation
+                if (p.objectUpdateInterval == -1) {
+                    p.obj.setLayoutX(p.newX);
+                    p.obj.setLayoutY(p.newY);
+                    p.obj.setRotate(p.newRotate);
+
+                } else {
+                    //make animation between last and newest point
+                    p.objectIntervalCounter += deltaT;
+                    if (p.objectIntervalCounter >= p.objectUpdateInterval) {
+                        p.objectIntervalCounter %= p.objectUpdateInterval;
+                        p.oldRotate = p.intRotate;
+                        p.oldX = p.intX;
+                        p.oldY = p.intY;
+
+                        p.intRotate = p.newRotate;
+                        p.intX = p.newX;
+                        p.intY = p.newY;
+                    }
+
+                    //non-linear animation
+                    p.obj.setLayoutX(p.oldX + ((p.intX - p.oldX) * Math.pow(p.objectIntervalCounter / p.objectUpdateInterval, 1.2)));
+                    p.obj.setLayoutY(p.oldY + ((p.intY - p.oldY) * Math.pow(p.objectIntervalCounter / p.objectUpdateInterval, 1.2)));
+                    p.obj.setRotate(p.oldRotate + ((p.intRotate - p.oldRotate) * Math.pow(p.objectIntervalCounter / p.objectUpdateInterval, 1.2)));
+                }
+
             }
-
-        }
-
-
+        });
     }
-
-
-
 }

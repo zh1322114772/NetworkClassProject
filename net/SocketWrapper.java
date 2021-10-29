@@ -82,6 +82,7 @@ public class SocketWrapper {
 
     public void sendPacket(PacketBase p) throws IOException
     {
+        sender.reset();
         sender.writeObject(p);
         sender.flush();
     }

@@ -2,6 +2,7 @@ package b451_Project.net;
 
 import b451_Project.game.EntityFactory;
 import b451_Project.game.Ship;
+import b451_Project.global.WindowVariables;
 import b451_Project.net.packets.*;
 
 import java.io.IOException;
@@ -12,9 +13,9 @@ import java.io.IOException;
 public class GameServer extends TCPServer{
 
     //ship movement variables
-    public static final double MAX_SHIP_SPEED = 5.0;
-    public static final double SHIP_ACCELERATION = 1.5;
-    public static final double SHIP_FRICTION = 0.9;
+    public static final float MAX_SHIP_SPEED = 20.0f;
+    public static final float SHIP_ACCELERATION = 10.0f;
+    public static final float SHIP_FRICTION = 0.9f;
 
     //player info
     private int playerCount = 0;
@@ -25,14 +26,17 @@ public class GameServer extends TCPServer{
     private boolean inGame = false;
     private EntityFactory ef;
     private Ship[] playerShipEntities = new Ship[2];
+    private TickPacket tp;
 
     private void startNewRound()
     {
         ef = new EntityFactory();
 
         //set player ship locations
-        playerShipEntities[0] = ef.makeShip(200, 240);
-        playerShipEntities[1] = ef.makeShip(200, 480);
+        playerShipEntities[0] = ef.makeShip((float)WindowVariables.WINDOW_WIDTH * 0.3333f, (float)WindowVariables.WINDOW_HEIGHT * 0.7f);
+        playerShipEntities[1] = ef.makeShip((float)WindowVariables.WINDOW_WIDTH * 0.6666f, (float)WindowVariables.WINDOW_HEIGHT * 0.7f);
+        tp = new TickPacket();
+        tp.entities = ef.getEntityList();
     }
 
     public GameServer() throws IOException
@@ -46,28 +50,28 @@ public class GameServer extends TCPServer{
     {
         if(!(t != null && p != null)) return;
 
-        double vx = p.vx;
-        double vy = p.vy;
+        float vx = p.vx;
+        float vy = p.vy;
 
         //apply velocity
         if(t.wKeyPressed)
         {
-            vx += SHIP_ACCELERATION;
+            vy -= SHIP_ACCELERATION;
         }
 
         if(t.sKeyPressed)
         {
-            vx -= SHIP_ACCELERATION;
+            vy += SHIP_ACCELERATION;
         }
 
         if(t.aKeyPressed)
         {
-            vy -= SHIP_ACCELERATION;
+            vx -= SHIP_ACCELERATION;
         }
 
         if(t.dKeyPressed)
         {
-            vy += SHIP_ACCELERATION;
+            vx += SHIP_ACCELERATION;
         }
 
         //check max speed
@@ -109,16 +113,10 @@ public class GameServer extends TCPServer{
 
         }
 
-
-
         //process logic
         ef.tick();
 
-        //send packets to clients
-        TickPacket tp = new TickPacket();
-        tp.entities = ef.getEntityList();
-
-        System.out.println(tp.entities.get(0).x + " " + tp.entities.get(0).y);
+        //send packets
         if(playerHandle[0] != -1)
         {
             sendPacket(tp, playerHandle[0]);

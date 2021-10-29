@@ -108,7 +108,7 @@ public class EntityFactory {
                 //not self
                 if(e.ID != n.ID)
                 {
-                    if(Math.sqrt(Math.pow(n.x - e.x, 2) + Math.pow(n.y - e.y, 2)) <= e.collisionCircleRange)
+                    if(Math.sqrt(Math.pow(n.x - e.x, 2) + Math.pow(n.y - e.y, 2)) <= (e.collisionCircleRange + n.collisionCircleRange))
                     {
                         collisionList[to] = i;
                         to++;
@@ -141,7 +141,7 @@ public class EntityFactory {
      * @param x ship x location
      * @param y ship y location
      * */
-    public Ship makeShip(double x, double y)
+    public Ship makeShip(float x, float y)
     {
         Ship s = new Ship(x, y);
         assignID(s);

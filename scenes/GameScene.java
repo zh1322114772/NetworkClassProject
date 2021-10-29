@@ -52,10 +52,7 @@ public class GameScene extends SceneBase {
 
     @Override
     protected void sceneRedraw(double deltaT) {
-        Platform.runLater(() ->
-        {
-            renderFactory.render(deltaT);
-        });
+        renderFactory.render(deltaT);
     }
 
     @Override
@@ -82,6 +79,14 @@ public class GameScene extends SceneBase {
 
         //set client key status
         GameVariables.client.setKeyPressed(w, a, s, d);
+    }
+
+    /**
+     * get game scene render factory
+     * */
+    public RenderFactory getRenderFactory()
+    {
+        return renderFactory;
     }
 
 }

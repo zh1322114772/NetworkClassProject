@@ -3,7 +3,7 @@ package b451_Project.game;
 
 public class FriendlyEntity extends Entity{
 
-    public FriendlyEntity(double x, double y, double vx, double xy, double range)
+    public FriendlyEntity(float x, float y, float vx, float xy, float range)
     {
         super(x, y, vx, xy, range);
     }

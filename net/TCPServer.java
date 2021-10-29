@@ -52,10 +52,11 @@ public abstract class TCPServer {
                 {
                     System.out.println(e);
                     e.printStackTrace();
+                    break;
                 }
 
             }
-
+            System.out.println("listen thread stopped");
         });
         connectionListenThread.start();
 
@@ -76,10 +77,10 @@ public abstract class TCPServer {
                         {
                             packetReceived(p, i);
                         }
+                        //update client timestamp
+                        clientTimestamp.set(i, System.currentTimeMillis());
                     }
 
-                    //update client timestamp
-                    clientTimestamp.set(i, System.currentTimeMillis());
                 }
 
                 //client timeout check
@@ -109,6 +110,10 @@ public abstract class TCPServer {
     {
         try
         {
+            for(SocketWrapper s : clientSockets)
+            {
+                s.close();
+            }
             threadFlag = false;
             server.close();
             loopThread.stop();
@@ -186,6 +191,9 @@ public abstract class TCPServer {
                     return true;
                 }catch(IOException e)
                 {
+                    clientDisconnected(handle);
+                    //force close socket
+                    disconnect(handle);
                     System.out.println(e);
                     e.printStackTrace();
                 }

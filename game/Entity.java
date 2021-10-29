@@ -10,15 +10,18 @@ public abstract class Entity implements Serializable {
     public int ID;
 
     //object x, y location
-    public double x = 0;
-    public double y = 0;
+    public float x = 0;
+    public float y = 0;
 
     //object x, y velocity
-    public double vx = 0;
-    public double vy = 0;
+    public float vx = 0;
+    public float vy = 0;
+
+    //object rotation
+    public float rotation = 0;
 
     //object collision detection range
-    public double collisionCircleRange = 0;
+    public float collisionCircleRange = 0;
 
     //collision callback
     /**
@@ -36,7 +39,7 @@ public abstract class Entity implements Serializable {
      * @param vy entity y velocity
      * @param range entity collision boundary range
      * */
-    public Entity(double x, double y, double vx, double vy, double range)
+    public Entity(float x, float y, float vx, float vy, float range)
     {
         this.x = x;
         this.y = y;

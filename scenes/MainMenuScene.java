@@ -95,6 +95,22 @@ public class MainMenuScene extends SceneBase {
 
         });
 
+        //when user click join a game
+        joinButton.setOnAction((e) ->
+        {
+            try
+            {
+                GameVariables.client = new GameClient(ipTextField.getText());
+                //send join request
+                GameVariables.client.sendPacket(new JoinPacket());
+
+            }catch(IOException ex)
+            {
+                WindowMsgBox.InfoMessage("Unable to connect the Server", ex.getMessage());
+            }
+
+        });
+
 
     }
 

@@ -9,15 +9,15 @@ public class WindowVariables {
     //avoid new instance
     private WindowVariables(){}
 
-    public static SceneBase MainMenuScene = new MainMenuScene();
+    public static MainMenuScene mainMenuScene = new MainMenuScene();
 
-    public static SceneBase GameScene = new GameScene();
+    public static GameScene gameScene = new GameScene();
 
     public static ComputerNetworkProgrammingProject game = null;
 
-    public static final int WINDOW_WIDTH = 1280;
+    public static final int WINDOW_WIDTH = 1366;
 
-    public static final int WINDOW_HEIGHT = 720;
+    public static final int WINDOW_HEIGHT = 768;
 
     public static final int WINDOW_FRAME_RATE = 60;
 
