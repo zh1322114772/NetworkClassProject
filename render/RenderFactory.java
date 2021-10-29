@@ -262,6 +262,55 @@ public class RenderFactory {
     {
         Platform.runLater(() ->
         {
+
+            //render all particles
+            for(RenderableObjectWrapper<ParticleGenerator> p : particles)
+            {
+                p.obj.tick(deltaT);
+            }
+
+            //update particle generators
+            for(int i = particles.size() - 1; i >=0; i--)
+            {
+                RenderableObjectWrapper<ParticleGenerator> p = particles.get(i);
+                if(p.lifeSpan != -1)
+                {
+                    p.lifeSpan -= deltaT;
+                    //early stop generating particles
+                    if((p.lifeSpan - p.obj.getSpan()) < p.obj.getSpan())
+                    {
+                        p.obj.stop();
+                    }
+
+                    //remove died particle generator
+                    if(p.lifeSpan <= 0)
+                    {
+                        p.obj.setDestroy();
+                        particles.remove(i);
+                        continue;
+                    }
+
+                }
+
+                //make animation between last and newest point
+                p.objectIntervalCounter += deltaT;
+                if (p.objectIntervalCounter >= p.objectUpdateInterval) {
+                    p.objectIntervalCounter %= p.objectUpdateInterval;
+
+                    p.intRotate = p.newRotate;
+                    p.intX = p.newX;
+                    p.intY = p.newY;
+                }
+
+                //non-linear animation
+                p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
+                p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
+                p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
+
+                p.obj.setLocation(p.oldX , p.oldY);
+                p.obj.setRotation(p.oldRotate);
+            }
+
             //render all polygons
             for (RenderableObjectWrapper<Polygon> p : polygons) {
                 //update lifespan
@@ -286,9 +335,6 @@ public class RenderFactory {
                     p.objectIntervalCounter += deltaT;
                     if (p.objectIntervalCounter >= p.objectUpdateInterval) {
                         p.objectIntervalCounter %= p.objectUpdateInterval;
-                        p.oldRotate = p.intRotate;
-                        p.oldX = p.intX;
-                        p.oldY = p.intY;
 
                         p.intRotate = p.newRotate;
                         p.intX = p.newX;
@@ -296,15 +342,16 @@ public class RenderFactory {
                     }
 
                     //non-linear animation
-                    p.obj.setLayoutX(p.oldX + ((p.intX - p.oldX) * Math.pow(p.objectIntervalCounter / p.objectUpdateInterval, 1.2)));
-                    p.obj.setLayoutY(p.oldY + ((p.intY - p.oldY) * Math.pow(p.objectIntervalCounter / p.objectUpdateInterval, 1.2)));
-                    p.obj.setRotate(p.oldRotate + ((p.intRotate - p.oldRotate) * Math.pow(p.objectIntervalCounter / p.objectUpdateInterval, 1.2)));
+                    p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
+                    p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
+                    p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
+
+                    p.obj.setLayoutX(p.oldX);
+                    p.obj.setLayoutY(p.oldY);
+                    p.obj.setRotate(p.oldRotate);
                 }
 
             }
-
-            //render all particles
-
 
         });
     }

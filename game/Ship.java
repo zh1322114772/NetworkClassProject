@@ -1,5 +1,7 @@
 package b451_Project.game;
 
+import b451_Project.global.WindowVariables;
+
 /**
  * player ship entity class
  * */
@@ -7,15 +9,36 @@ public class Ship extends FriendlyEntity{
 
     public Ship(float x, float y)
     {
-        super(x, y, 0, 0, 30);
+        super(x, y, 0, 0, 5);
         rotation = 30;
     }
 
     @Override
     public void borderCollision(boolean top, boolean bottom, boolean left, boolean right)
     {
-        //test
-        System.out.println("ouch");
+        if(top)
+        {
+            y = collisionCircleRange;
+            vy = 0;
+        }
+
+        if(bottom)
+        {
+            y = WindowVariables.WINDOW_HEIGHT - collisionCircleRange;
+            vy = 0;
+        }
+
+        if(left)
+        {
+            x = collisionCircleRange;
+            vx = 0;
+        }
+
+        if(right)
+        {
+            x = WindowVariables.WINDOW_WIDTH - collisionCircleRange;
+            vx = 0;
+        }
     }
 
     @Override

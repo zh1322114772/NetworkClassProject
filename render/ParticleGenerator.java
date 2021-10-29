@@ -60,7 +60,7 @@ public class ParticleGenerator {
         {
             this.lifeSpan = 1;
         }
-
+        this.lifeSpan = lifeSpan;
         this.generateInterval = generateInterval;
         this.direction = direction;
         this.dRange = dRange;
@@ -106,7 +106,20 @@ public class ParticleGenerator {
             rf.setPolygonDestroy(particleList.get(i).objectID);
             particleList.remove(i);
         }
+        stop();
+    }
+
+    /**
+     * stop generating new particles
+     * */
+    public void stop()
+    {
         generateInterval = 999999999999999999f;
+    }
+
+    public float getSpan()
+    {
+        return lifeSpan;
     }
 
     /**
@@ -151,6 +164,7 @@ public class ParticleGenerator {
             p.vy *= friction;
             p.x += p.vx;
             p.y +=p.vy;
+            p.span -= dt;
             rf.setPolygonCenterLocation(p.objectID, p.x, p.y);
         }
 
