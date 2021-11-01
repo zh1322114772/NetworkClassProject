@@ -3,9 +3,12 @@ package b451_Project.game;
 
 public class FriendlyEntity extends Entity{
 
-    public FriendlyEntity(float x, float y, float vx, float xy, float range)
+    protected float hp;
+
+    public FriendlyEntity(float x, float y, float vx, float xy, float range, float hp)
     {
         super(x, y, vx, xy, range);
+        this.hp = hp;
     }
 
     @Override
@@ -14,7 +17,7 @@ public class FriendlyEntity extends Entity{
     }
 
     @Override
-    public void collision(int[] collisionList, int from, int to) {
+    public void collision(Entity[] collisionList, int from, int to) {
 
     }
 }

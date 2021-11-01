@@ -9,7 +9,7 @@ public class Ship extends FriendlyEntity{
 
     public Ship(float x, float y)
     {
-        super(x, y, 0, 0, 5);
+        super(x, y, 0, 0, 20, 100);
         rotation = 30;
     }
 
@@ -42,7 +42,7 @@ public class Ship extends FriendlyEntity{
     }
 
     @Override
-    public void collision(int[] collisionList, int from, int to)
+    public void collision(Entity[] collisionList, int from, int to)
     {
         System.out.println("ouch" + from + " " + to);
     }

@@ -53,7 +53,7 @@ public class ParticleGenerator {
      * @param orderView z-depth value
      * @param rf render factory instance
      * */
-    public ParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float lifeSpan, float x, float y, float friction, int orderView, RenderFactory rf)
+    public ParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float lifeSpan, float x, float y, float friction, float orderView, RenderFactory rf)
     {
         //particles must have lifeSpan
         if(lifeSpan == -1)
@@ -164,7 +164,7 @@ public class ParticleGenerator {
             p.vy *= friction;
             p.x += p.vx;
             p.y +=p.vy;
-            p.span -= dt;
+
             rf.setPolygonCenterLocation(p.objectID, p.x, p.y);
         }
 

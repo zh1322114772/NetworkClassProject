@@ -1,6 +1,8 @@
 package b451_Project.net.packets;
 
 import b451_Project.game.Entity;
+import b451_Project.game.ParticlePlayer;
+
 import java.util.ArrayList;
 
 /**
@@ -8,4 +10,5 @@ import java.util.ArrayList;
  * */
 public class TickPacket implements PacketBase{
     public ArrayList<Entity> entities;
+    public ArrayList<ParticlePlayer> particles;
 }

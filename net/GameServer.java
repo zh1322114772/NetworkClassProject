@@ -1,11 +1,14 @@
 package b451_Project.net;
 
+import b451_Project.game.Asteroid;
 import b451_Project.game.EntityFactory;
 import b451_Project.game.Ship;
+import b451_Project.global.GameVariables;
 import b451_Project.global.WindowVariables;
 import b451_Project.net.packets.*;
 
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Game server class of the game
@@ -27,20 +30,22 @@ public class GameServer extends TCPServer{
     private EntityFactory ef;
     private Ship[] playerShipEntities = new Ship[2];
     private TickPacket tp;
-
+    private Random ranGen;
     private void startNewRound()
     {
         ef = new EntityFactory();
-
+        GameVariables.entityFactory = ef;
         //set player ship locations
         playerShipEntities[0] = ef.makeShip((float)WindowVariables.WINDOW_WIDTH * 0.3333f, (float)WindowVariables.WINDOW_HEIGHT * 0.7f);
         playerShipEntities[1] = ef.makeShip((float)WindowVariables.WINDOW_WIDTH * 0.6666f, (float)WindowVariables.WINDOW_HEIGHT * 0.7f);
         tp = new TickPacket();
         tp.entities = ef.getEntityList();
+        tp.particles = ef.particles;
     }
 
     public GameServer() throws IOException
     {
+        ranGen = new Random();
         playerHandle[0] = -1;
         playerHandle[1] = -1;
         startNewRound();
@@ -92,6 +97,17 @@ public class GameServer extends TCPServer{
         p.vy = vy;
     }
 
+    private void gameLogicProcess(double d)
+    {
+        //generate asteroid
+        if(ranGen.nextFloat() > 0.85)
+        {
+            Asteroid a = ef.makeAsteroid(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
+            a.vy = 35;
+        }
+
+    }
+
     @Override
     protected void tick(double d)
     {
@@ -110,7 +126,7 @@ public class GameServer extends TCPServer{
 
         if(inGame)
         {
-
+            gameLogicProcess(d);
         }
 
         //process logic
@@ -126,6 +142,8 @@ public class GameServer extends TCPServer{
         {
             sendPacket(tp, playerHandle[1]);
         }
+
+        ef.particles.clear();
     }
 
     @Override

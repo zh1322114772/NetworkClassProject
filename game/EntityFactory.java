@@ -18,31 +18,21 @@ public class EntityFactory {
 
     //object array
     private ArrayList<Entity> objects = new ArrayList<Entity>();
-
-    //use max priority queue to ensure remove object from back to front
-    private PriorityQueue<Integer> maxQueue = new PriorityQueue<Integer>(20, Collections.reverseOrder());
+    public ArrayList<ParticlePlayer> particles = new ArrayList<ParticlePlayer>();
 
     //indices of collided objects
-    private int[] collisionList = new int[1024];
+    private Entity[] collisionList = new Entity[1024];
 
-    /**
-     * remove an object
-     * @param i index
-     * */
-    public void removeObject(int i)
-    {
-        if(i < objects.size())
-        {
-            maxQueue.add(i);
-        }
-    }
 
     public void tick()
     {
-        //remove object
-        while(!maxQueue.isEmpty())
+        //remove objects
+        for(int i = objects.size() - 1; i>=0; i--)
         {
-            objects.remove(maxQueue.poll());
+            if(!objects.get(i).alive)
+            {
+                objects.remove(i);
+            }
         }
 
         //apply movement
@@ -55,7 +45,7 @@ public class EntityFactory {
         //check if array expansion is needed
         if(collisionList.length < (objects.size() * objects.size()))
         {
-            int[] temp = new int[(int)Math.pow((double)objects.size() * EXPAND_FACTOR, 2)];
+            Entity[] temp = new Entity[(int)Math.pow((double)objects.size() * EXPAND_FACTOR, 2)];
             //move data
             for(int i=0; i < collisionList.length; i++)
             {
@@ -110,7 +100,7 @@ public class EntityFactory {
                 {
                     if(Math.sqrt(Math.pow(n.x - e.x, 2) + Math.pow(n.y - e.y, 2)) <= (e.collisionCircleRange + n.collisionCircleRange))
                     {
-                        collisionList[to] = i;
+                        collisionList[to] = n;
                         to++;
                     }
                 }
@@ -146,6 +136,18 @@ public class EntityFactory {
         Ship s = new Ship(x, y);
         assignID(s);
         return s;
+    }
+
+    /**
+     * create a new instance of asteroid entity
+     * @param x asteroid x location
+     * @param y asteroid y location
+     * */
+    public Asteroid makeAsteroid(float x, float y)
+    {
+        Asteroid a = new Asteroid(x, y);
+        assignID(a);
+        return a;
     }
 
     public ArrayList<Entity> getEntityList()

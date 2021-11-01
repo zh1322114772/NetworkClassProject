@@ -1,5 +1,6 @@
 package b451_Project.global;
 
+import b451_Project.game.EntityFactory;
 import b451_Project.net.GameClient;
 import b451_Project.net.GameServer;
 
@@ -10,6 +11,8 @@ public class GameVariables {
     public static GameServer server = null;
 
     public static GameClient client = null;
+
+    public static EntityFactory entityFactory = null;
 
 
 }

@@ -15,7 +15,7 @@ public abstract class SceneBase {
 
     public SceneBase()
     {
-        timer = new Timer(true);
+        timer = new Timer(false);
         pane = new Pane();
         scene = new Scene(pane, WindowVariables.WINDOW_WIDTH, WindowVariables.WINDOW_HEIGHT);
 

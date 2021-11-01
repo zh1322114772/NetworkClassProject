@@ -5,9 +5,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.lang.Math;
 
 //this render factory manage all renderable objects of the game
@@ -51,19 +49,23 @@ public class RenderFactory {
 
     }
 
-    private ArrayList<RenderableObjectWrapper<Polygon>> polygons;
-    private ArrayList<RenderableObjectWrapper<ParticleGenerator>> particles;
-    private Queue<Integer> polygonRecycleList;
-    private Queue<Integer> particleRecycleList;
+    private HashMap<Integer ,RenderableObjectWrapper<Polygon>> polygons;
+    private HashMap<Integer ,RenderableObjectWrapper<ParticleGenerator>> particles;
     private Pane pane;
+    private int counter = 0;
 
     public RenderFactory(Pane p)
     {
         this.pane = p;
-        polygons = new ArrayList<RenderableObjectWrapper<Polygon>>();
-        particles = new ArrayList<RenderableObjectWrapper<ParticleGenerator>>();
-        polygonRecycleList = new LinkedList<Integer>();
-        particleRecycleList = new LinkedList<Integer>();
+        polygons = new HashMap<Integer ,RenderableObjectWrapper<Polygon>>();
+        particles = new HashMap<Integer, RenderableObjectWrapper<ParticleGenerator>>();
+    }
+
+    private int getID()
+    {
+        counter++;
+        counter %= 2147483647;
+        return counter;
     }
 
     /**
@@ -89,21 +91,7 @@ public class RenderFactory {
             vertices = 3;
         }
 
-        //check if there's reusbale polygon
-        int id;
-        if(polygonRecycleList.isEmpty())
-        {
-            polygons.add(new RenderableObjectWrapper<Polygon>(new Polygon(), lifeSpan, objUpdateInterval));
-            id = polygons.size() - 1;
-        }else
-        {
-            id = polygonRecycleList.poll().intValue();
-            polygons.get(id).lifeSpan = lifeSpan;
-            polygons.get(id).objectUpdateInterval = objUpdateInterval;
-        }
-
-        RenderableObjectWrapper<Polygon> polygon = polygons.get(id);
-
+        RenderableObjectWrapper<Polygon> polygon = new RenderableObjectWrapper<Polygon>(new Polygon(), lifeSpan, objUpdateInterval);
         polygon.newX = x;
         polygon.newY =y;
         polygon.intX = x;
@@ -130,7 +118,14 @@ public class RenderFactory {
         Platform.runLater(() ->
         {
             pane.getChildren().add(polygon.obj);
+            polygon.obj.setLayoutX(x);
+            polygon.obj.setLayoutY(y);
+            polygon.obj.setRotate(rotate);
         });
+
+        //add to hashmap
+        int id = getID();
+        polygons.put(id, polygon);
         return id;
     }
 
@@ -141,9 +136,9 @@ public class RenderFactory {
      * */
     public synchronized void setPolygonRotation(int polygonID, float deg)
     {
-        if(polygonID < polygons.size() && polygonID >= 0)
+        RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
+        if(polygon != null)
         {
-            RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
             polygon.newRotate = deg;
         }
     }
@@ -156,9 +151,9 @@ public class RenderFactory {
      * */
     public synchronized void setPolygonCenterLocation(int polygonID, float x, float y)
     {
-        if(polygonID < polygons.size() && polygonID >= 0)
+        RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
+        if(polygon != null)
         {
-            RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
             polygon.newX = x;
             polygon.newY = y;
         }
@@ -170,9 +165,9 @@ public class RenderFactory {
      * */
     public synchronized void setPolygonDestroy(int polygonID)
     {
-        if(polygonID < polygons.size() && polygonID >= 0)
+        RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
+        if(polygon != null)
         {
-            RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
             polygon.lifeSpan = 0;
         }
     }
@@ -192,7 +187,7 @@ public class RenderFactory {
      * @param friction particle friction
      * @param orderView z-depth value
      * */
-    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, int orderView)
+    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, float orderView)
     {
         ParticleGenerator p = new ParticleGenerator(generateInterval, direction, dRange, velocity, vRange, color, particleLifeSpan, x, y, friction, orderView, this);
         RenderableObjectWrapper<ParticleGenerator> rp = new RenderableObjectWrapper<ParticleGenerator>(p, generatorLifeSpan, 1.0f/ ConfigVariables.GAME_TICK_RATE);
@@ -207,8 +202,10 @@ public class RenderFactory {
         rp.intRotate = direction;
         rp.newRotate = direction;
 
-        particles.add(rp);
-        return particles.size() - 1;
+        //add to hashmap
+        int id = getID();
+        particles.put(id, rp);
+        return id;
     }
 
     /**
@@ -217,9 +214,9 @@ public class RenderFactory {
      * */
     public synchronized void setParticleGeneratorRotation(int generatorID, float deg)
     {
-        if(generatorID < particles.size() && generatorID >= 0)
+        RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+        if(p != null)
         {
-            RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
             p.newRotate = deg;
         }
     }
@@ -232,9 +229,9 @@ public class RenderFactory {
      * */
     public synchronized void setParticleGeneratorLocation(int generatorID, float x, float y)
     {
-        if(generatorID < particles.size() && generatorID >= 0)
+        RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+        if(p != null)
         {
-            RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
             p.newX = x;
             p.newY = y;
         }
@@ -246,9 +243,9 @@ public class RenderFactory {
      * */
     public synchronized void setParticleGeneratorDestroy(int generatorID)
     {
-        if(generatorID < particles.size() && generatorID >= 0)
+        RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+        if(p != null)
         {
-            RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
             p.lifeSpan = 0;
             p.obj.setDestroy();
         }
@@ -260,38 +257,84 @@ public class RenderFactory {
      * */
     public synchronized void render(double deltaT)
     {
-        Platform.runLater(() ->
+        //render all particles
+        for(Integer i : particles.keySet())
         {
+            RenderableObjectWrapper<ParticleGenerator> p = particles.get(i);
+            p.obj.tick(deltaT);
+        }
 
-            //render all particles
-            for(RenderableObjectWrapper<ParticleGenerator> p : particles)
+        //update particle generators
+        Iterator<RenderableObjectWrapper<ParticleGenerator>> particleIterator = particles.values().iterator();
+        while(particleIterator.hasNext())
+        {
+            RenderableObjectWrapper<ParticleGenerator> p = particleIterator.next();
+            if(p.lifeSpan != -1)
             {
-                p.obj.tick(deltaT);
-            }
-
-            //update particle generators
-            for(int i = particles.size() - 1; i >=0; i--)
-            {
-                RenderableObjectWrapper<ParticleGenerator> p = particles.get(i);
-                if(p.lifeSpan != -1)
+                p.lifeSpan -= deltaT;
+                //early stop generating particles
+                if((p.lifeSpan - p.obj.getSpan()) < p.obj.getSpan())
                 {
-                    p.lifeSpan -= deltaT;
-                    //early stop generating particles
-                    if((p.lifeSpan - p.obj.getSpan()) < p.obj.getSpan())
-                    {
-                        p.obj.stop();
-                    }
-
-                    //remove died particle generator
-                    if(p.lifeSpan <= 0)
-                    {
-                        p.obj.setDestroy();
-                        particles.remove(i);
-                        continue;
-                    }
-
+                    p.obj.stop();
                 }
 
+                //remove died particle generator
+                if(p.lifeSpan <= 0)
+                {
+                    p.obj.setDestroy();
+                    particleIterator.remove();
+                    continue;
+                }
+
+            }
+
+            //make animation between last and newest point
+            p.objectIntervalCounter += deltaT;
+            if (p.objectIntervalCounter >= p.objectUpdateInterval) {
+                p.objectIntervalCounter %= p.objectUpdateInterval;
+
+                p.intRotate = p.newRotate;
+                p.intX = p.newX;
+                p.intY = p.newY;
+            }
+
+            //non-linear animation
+            p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
+            p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
+            p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
+
+            p.obj.setLocation(p.oldX , p.oldY);
+            p.obj.setRotation(p.oldRotate);
+        }
+
+        //update time span, delete all died polygons and render all polygons
+        Iterator<RenderableObjectWrapper<Polygon>> polygonIterator = polygons.values().iterator();
+        while (polygonIterator.hasNext()) {
+            RenderableObjectWrapper<Polygon> p = polygonIterator.next();
+
+            //update lifespan
+            if (p.lifeSpan != -1) {
+                p.lifeSpan -= deltaT;
+
+                if (p.lifeSpan <= 0) {
+                    Platform.runLater(() ->
+                    {
+                        pane.getChildren().remove(p.obj);
+                    });
+                    polygonIterator.remove();
+                    continue;
+                }
+            }
+
+            //update location and rotation
+            if (p.objectUpdateInterval == -1) {
+                Platform.runLater(() ->
+                {
+                    p.obj.setLayoutX(p.newX);
+                    p.obj.setLayoutY(p.newY);
+                    p.obj.setRotate(p.newRotate);
+                });
+            } else {
                 //make animation between last and newest point
                 p.objectIntervalCounter += deltaT;
                 if (p.objectIntervalCounter >= p.objectUpdateInterval) {
@@ -306,54 +349,16 @@ public class RenderFactory {
                 p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
                 p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
                 p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
-
-                p.obj.setLocation(p.oldX , p.oldY);
-                p.obj.setRotation(p.oldRotate);
-            }
-
-            //render all polygons
-            for (RenderableObjectWrapper<Polygon> p : polygons) {
-                //update lifespan
-                if (p.lifeSpan != -1) {
-                    p.lifeSpan -= deltaT;
-                    //recycle polygon
-                    if (p.lifeSpan <= 0) {
-                        p.lifeSpan = 0;
-                        pane.getChildren().remove(p.obj);
-                        continue;
-                    }
-                }
-
-                //update location and rotation
-                if (p.objectUpdateInterval == -1) {
-                    p.obj.setLayoutX(p.newX);
-                    p.obj.setLayoutY(p.newY);
-                    p.obj.setRotate(p.newRotate);
-
-                } else {
-                    //make animation between last and newest point
-                    p.objectIntervalCounter += deltaT;
-                    if (p.objectIntervalCounter >= p.objectUpdateInterval) {
-                        p.objectIntervalCounter %= p.objectUpdateInterval;
-
-                        p.intRotate = p.newRotate;
-                        p.intX = p.newX;
-                        p.intY = p.newY;
-                    }
-
-                    //non-linear animation
-                    p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
-                    p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
-                    p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
-
+                Platform.runLater(() ->
+                {
                     p.obj.setLayoutX(p.oldX);
                     p.obj.setLayoutY(p.oldY);
                     p.obj.setRotate(p.oldRotate);
-                }
-
+                });
             }
 
-        });
+        }
+
     }
 
 }

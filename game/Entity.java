@@ -23,6 +23,8 @@ public abstract class Entity implements Serializable {
     //object collision detection range
     public float collisionCircleRange = 0;
 
+    public boolean alive = true;
+
     //collision callback
     /**
      * object collision callback
@@ -30,7 +32,7 @@ public abstract class Entity implements Serializable {
      * @param from array index from
      * @param to array index to
      * */
-    public abstract void collision(int[] collisionList, int from, int to);
+    public abstract void collision(Entity[] collisionList, int from, int to);
 
     /**
      * @param x entity x location
@@ -52,5 +54,7 @@ public abstract class Entity implements Serializable {
      * if object collided with screen boundary
      * */
     public abstract void borderCollision(boolean top, boolean bottom, boolean left, boolean right);
+
+
 
 }
