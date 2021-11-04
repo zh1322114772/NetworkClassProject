@@ -9,7 +9,7 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
 
     private static double EXPLODE_TIME = 10;
     private static float SENSITIVITY = 0.1f;
-    private static float SPEED = 50;
+    private static float SPEED = 70;
 
     // missile explode after 15 second
     private double counter = 0;

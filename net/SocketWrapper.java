@@ -102,7 +102,7 @@ public class SocketWrapper {
             {
                 System.out.println(e);
                 e.printStackTrace();
-                close();
+                //close();
             }
         }
     }

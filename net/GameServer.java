@@ -116,7 +116,7 @@ public class GameServer extends TCPServer{
         if(ranGen.nextFloat() > 0.9)
         {
             float shootingDirection = (float)(Math.random() * 1.5707963) + 0.78539815f;
-            float shootingVelocity = (float)(Math.random() * 60) + 15;
+            float shootingVelocity = (float)(Math.random() * 80) + 20;
 
             Asteroid a = ef.makeAsteroid(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
             a.vy = (float)Math.sin(shootingDirection) * shootingVelocity;
