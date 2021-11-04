@@ -9,9 +9,12 @@ public class ParticlePlayer implements Serializable {
     public float dRange;
     public float velocity;
     public float vRange;
+    public float radius;
+    public float rRange;
     public float r;
     public float g;
     public float b;
+    public float a;
     public float particleLifeSpan;
     public float generatorLifeSpan;
     public float x;

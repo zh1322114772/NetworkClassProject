@@ -1,13 +1,9 @@
 package b451_Project.render;
 import b451_Project.global.ConfigVariables;
-import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 
 import java.util.*;
-import java.lang.Math;
 
 //this render factory manage all renderable objects of the game
 public class RenderFactory {
@@ -190,12 +186,31 @@ public class RenderFactory {
     }
 
     /**
+     * change polygon's fill color
+     * @param polygonID polygon id
+     * @param c fill color
+     * */
+    public synchronized void setPolygonColor(long polygonID, Color c)
+    {
+        int id = (int)(polygonID & (0xffffffffl));
+        int layer = (int)(polygonID >> 32);
+
+        RenderableObjectWrapper<CanvasPolygon> polygon = polygons.get(layer).get(id);
+        if(polygon != null)
+        {
+            polygon.obj.setColor(c);
+        }
+    }
+
+    /**
      * generate a new instance of particle generator
      * @param generateInterval time interval to generate a new particle
      * @param direction particle shooting direction (in degrees)
      * @param dRange random direction range, that is set particle's direction within range of random(direction-dRange, direction + dRange)
      * @param velocity particle initial velocity
      * @param vRange random velocity range, that is set particle's initial velocity within range of random(velocity - vRange, velocity + vRange)
+     * @param radius particle radius
+     * @param rRange radius random range
      * @param color particle color
      * @param particleLifeSpan particle survival time in seconds
      * @param generatorLifeSpan particle generator life span, set -1 to unlimited time
@@ -204,9 +219,9 @@ public class RenderFactory {
      * @param friction particle friction
      * @param orderView z-depth value must between 0-4
      * */
-    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, int orderView)
+    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, float radius, float rRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, int orderView)
     {
-        ParticleGenerator p = new ParticleGenerator(generateInterval, direction, dRange, velocity, vRange, color, particleLifeSpan, x, y, friction, orderView, this);
+        ParticleGenerator p = new ParticleGenerator(generateInterval, direction, dRange, velocity, vRange, radius, rRange, color, particleLifeSpan, x, y, friction, orderView, this);
         RenderableObjectWrapper<ParticleGenerator> rp = new RenderableObjectWrapper<ParticleGenerator>(p, generatorLifeSpan, 1.0f/ ConfigVariables.GAME_TICK_RATE);
 
         rp.newX = x;
@@ -265,6 +280,36 @@ public class RenderFactory {
         {
             p.lifeSpan = 0;
             p.obj.setDestroy();
+        }
+    }
+    /**
+     * set polygon visible status
+     * @param polygonID polygon id
+     * @param v visible status, true = visible, false = invisible
+     * */
+    public synchronized void setPolygonVisibleStatus(long polygonID, boolean v)
+    {
+        int id = (int)(polygonID & (0xffffffffl));
+        int layer = (int)(polygonID >> 32);
+
+        RenderableObjectWrapper<CanvasPolygon> polygon = polygons.get(layer).get(id);
+        if(polygon != null)
+        {
+            polygon.obj.setVisible(v);
+        }
+    }
+
+    /**
+     * set particle generator visible status
+     * @param generatorID generator id
+     * @param v visible if true, invisible if false
+     * */
+    public synchronized void setParticleGeneratorVisibleStatus(int generatorID, boolean v)
+    {
+        RenderableObjectWrapper<ParticleGenerator> p = particles.get(generatorID);
+        if(p != null)
+        {
+            p.obj.setVisibleStatus(v);
         }
     }
 

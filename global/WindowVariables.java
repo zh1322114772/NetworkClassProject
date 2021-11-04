@@ -2,7 +2,6 @@ package b451_Project.global;
 import b451_Project.ComputerNetworkProgrammingProject;
 import b451_Project.scenes.GameScene;
 import b451_Project.scenes.MainMenuScene;
-import b451_Project.scenes.SceneBase;
 
 public class WindowVariables {
 

@@ -34,9 +34,12 @@ public class ParticleGenerator {
     private float x;
     private float y;
     private int orderView;
+    private float radius;
+    private float rRange;
     private ArrayList<Particle> particleList;
     private double intervalCounter = 0;
     RenderFactory rf;
+    private  boolean visible = true;
     private Random ranGen;
 
     /**
@@ -45,6 +48,8 @@ public class ParticleGenerator {
      * @param dRange random direction range, that is set particle's direction within range of random(direction-dRange, direction + dRange)
      * @param velocity particle initial velocity
      * @param vRange random velocity range, that is set particle's initial velocity within range of random(velocity - vRange, velocity + vRange)
+     * @param radius particle radius
+     * @param rRange radius random range
      * @param color particle color
      * @param lifeSpan particle survival time in seconds
      * @param x particle generator x location
@@ -53,7 +58,7 @@ public class ParticleGenerator {
      * @param orderView z-depth value
      * @param rf render factory instance
      * */
-    public ParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float lifeSpan, float x, float y, float friction, int orderView, RenderFactory rf)
+    public ParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, float radius, float rRange, Color color, float lifeSpan, float x, float y, float friction, int orderView, RenderFactory rf)
     {
         //particles must have lifeSpan
         if(lifeSpan == -1)
@@ -65,6 +70,8 @@ public class ParticleGenerator {
         this.direction = direction;
         this.dRange = dRange;
         this.velocity = velocity;
+        this.radius = radius;
+        this.rRange = rRange;
         this.vRange = vRange;
         this.color = color;
         this.x = x;
@@ -94,6 +101,15 @@ public class ParticleGenerator {
     public void setRotation(float d)
     {
         this.direction = d;
+    }
+
+    /**
+     * set particle generator visible status
+     * @param v, visible if true, invisible if false
+     * */
+    public void setVisibleStatus(boolean v)
+    {
+        visible = v;
     }
 
     /**
@@ -150,7 +166,8 @@ public class ParticleGenerator {
             p.y = this.y;
             p.vx = (float)(Math.cos(Math.toRadians(dir)) * vel);
             p.vy = (float)(Math.sin(Math.toRadians(dir)) * vel);
-            p.objectID = rf.makePolygon(-1, -1, color, 8, 5, orderView, 0, p.x, p.y);
+            p.objectID = rf.makePolygon(-1, -1, color, 8, rRange + (float)(radius + (Math.random() * rRange * 2) - rRange), orderView, 0, p.x, p.y);
+            rf.setPolygonVisibleStatus(p.objectID, visible);
             particleList.add(p);
 
             intervalCounter-= generateInterval;
@@ -165,6 +182,7 @@ public class ParticleGenerator {
             p.x += p.vx;
             p.y +=p.vy;
 
+            rf.setPolygonVisibleStatus(p.objectID, visible);
             rf.setPolygonCenterLocation(p.objectID, p.x, p.y);
         }
 

@@ -90,17 +90,30 @@ public class GameServer extends TCPServer{
             vy = (Math.abs(vy)/vy) * MAX_SHIP_SPEED;
         }
 
-        //add friction
-        vx *= SHIP_FRICTION;
-        vy *= SHIP_FRICTION;
-        p.vx = vx;
-        p.vy = vy;
+        //check ship health
+        if(p.hp > 0)
+        {
+            //add friction
+            vx *= SHIP_FRICTION;
+            vy *= SHIP_FRICTION;
+            p.vx = vx;
+            p.vy = vy;
+        }else
+        {
+            p.vx = 0;
+            p.vy = 0;
+        }
     }
 
     private void gameLogicProcess(double d)
     {
+        if(playerShipEntities[0].hp <= 0 && playerShipEntities[1].hp <= 0)
+        {
+            inGame = false;
+        }
+
         //generate asteroid
-        if(ranGen.nextFloat() > 0.8)
+        if(ranGen.nextFloat() > 0.9)
         {
             float shootingDirection = (float)(Math.random() * 1.5707963) + 0.78539815f;
             float shootingVelocity = (float)(Math.random() * 60) + 15;
@@ -109,6 +122,12 @@ public class GameServer extends TCPServer{
             a.vy = (float)Math.sin(shootingDirection) * shootingVelocity;
             a.vx = (float)Math.cos(shootingDirection) * shootingVelocity;
             a.rotation = shootingDirection + 3.1415926f;
+        }
+
+        //generate missile
+        if(ranGen.nextFloat() > 0.97)
+        {
+            ef.makeMissile(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
         }
 
     }
@@ -135,7 +154,7 @@ public class GameServer extends TCPServer{
         }
 
         //process logic
-        ef.tick();
+        ef.tick(d);
 
         //send packets
         if(playerHandle[0] != -1)
@@ -163,14 +182,17 @@ public class GameServer extends TCPServer{
         {
             playerHandle[0] = -1;
             playerCount--;
+            inGame = false;
+            sendPacket(new MsgPacket("Game ended", "Player Disconnected from the game"), playerHandle[1]);
         }
 
         if(handle == playerHandle[1])
         {
             playerHandle[1] = -1;
             playerCount--;
+            inGame = false;
+            sendPacket(new MsgPacket("Game ended", "Player Disconnected from the game"), playerHandle[0]);
         }
-
     }
 
     @Override

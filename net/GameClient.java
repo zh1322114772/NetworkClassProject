@@ -1,9 +1,6 @@
 package b451_Project.net;
 
-import b451_Project.game.Asteroid;
-import b451_Project.game.Entity;
-import b451_Project.game.ParticlePlayer;
-import b451_Project.game.Ship;
+import b451_Project.game.*;
 import b451_Project.global.ConfigVariables;
 import b451_Project.global.WindowMsgBox;
 import b451_Project.global.WindowVariables;
@@ -125,8 +122,8 @@ public class GameClient extends TCPClient{
                     if(e instanceof Ship)
                     {
                         //particle effects
-                        Integer flame0 = rf.makeParticleGenerator(0.01f, 90, 10, 16, 4, Color.color(1, 0, 0, 0.5), 0.5f, -1, e.x, e.y, 1f, 2);
-                        Integer flame1 = rf.makeParticleGenerator(0.01f, 90, 7, 16, 4, Color.color(1, 1, 0, 0.5), 0.5f, -1, e.x, e.y, 1f, 2);
+                        Integer flame0 = rf.makeParticleGenerator(0.01f, 90, 10, 16, 4, 4, 4, Color.color(1, 0, 0, 0.5), 0.5f, -1, e.x, e.y, 0.98f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.01f, 90, 7, 16, 4, 4, 4, Color.color(1, 1, 0, 0.5), 0.5f, -1, e.x, e.y, 0.98f, 2);
                         ef.add(flame0);
                         ef.add(flame1);
 
@@ -134,12 +131,23 @@ public class GameClient extends TCPClient{
                         id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BLUE, 3, 40, 1, e.rotation, e.x, e.y);
                     }else if(e instanceof Asteroid)
                     {
-                        Integer flame0 = rf.makeParticleGenerator(0.02f, (float)Math.toDegrees(e.rotation), 30, 17, 4, Color.color(0.3, 0.3, 0.3, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
-                        Integer flame1 = rf.makeParticleGenerator(0.02f, (float)Math.toDegrees(e.rotation), 30, 17, 4, Color.color(0.5, 0.5, 0.5, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
+                        float direction = (float)Math.toDegrees(Math.atan2((double)e.vy, (double)e.vx));
+
+                        Integer flame0 = rf.makeParticleGenerator(0.02f, direction, 30, 17, 4, 4, 4, Color.color(0.3, 0.3, 0.3, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.02f, direction, 30, 17, 4, 4, 4, Color.color(0.5, 0.5, 0.5, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
                         ef.add(flame0);
                         ef.add(flame1);
 
                         id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BROWN, 8, 40, 0, e.rotation, e.x, e.y);
+                    }else if(e instanceof Missile)
+                    {
+
+                        Integer flame0 = rf.makeParticleGenerator(0.02f, e.rotation + 180, 15, 16, 4, 4, 4, Color.color(0.0, 0.6, 0.1, 0.5), 0.15f, -1, e.x, e.y, 0.98f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.02f, e.rotation + 180, 15, 16, 4, 4, 4, Color.color(0.0, 1.0, 0.0, 0.5), 0.15f, -1, e.x, e.y, 0.98f, 2);
+                        ef.add(flame0);
+                        ef.add(flame1);
+
+                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.LIGHTGREY, 3, 30, 2, e.rotation, e.x, e.y);
                     }
 
                     //add to hashmap
@@ -151,6 +159,27 @@ public class GameClient extends TCPClient{
                     rf.setPolygonCenterLocation(triplet.first, e.x, e.y);
                     rf.setPolygonRotation(triplet.first, e.rotation);
                     triplet.second = true;
+                    boolean flameVisible = true;
+
+                    //render ship health
+                    if(e instanceof Ship)
+                    {
+                        Ship s = (Ship)e;
+                        float health = s.hp / 100.0f;
+                        float alpha = (health <= 0 ) ? 0.2f : 1f;
+
+                        //if ship is died, then don't render flame
+                        if(health <= 0)
+                        {
+                            flameVisible = false;
+                        }
+
+                        Color newColor = Color.color((health * Color.BLUE.getRed()) + ((1 - health) * Color.RED.getRed()),
+                                                    (health * Color.BLUE.getGreen()) + ((1 - health) * Color.RED.getGreen()),
+                                                    (health * Color.BLUE.getBlue()) + ((1 - health) * Color.RED.getBlue()), alpha);
+
+                        rf.setPolygonColor(triplet.first, newColor);
+                    }
 
                     //update particle effects
                     ArrayList<Integer> ef = triplet.third;
@@ -158,7 +187,9 @@ public class GameClient extends TCPClient{
                     {
                         for(Integer i : ef)
                         {
+                            rf.setParticleGeneratorVisibleStatus(i, flameVisible);
                             rf.setParticleGeneratorLocation(i ,e.x, e.y);
+                            rf.setParticleGeneratorRotation(i ,e.rotation + 180);
                         }
                     }
 
@@ -188,7 +219,7 @@ public class GameClient extends TCPClient{
             //particles
             for(ParticlePlayer particle : tp.particles)
             {
-                rf.makeParticleGenerator(particle.generateInterval, particle.direction, particle.dRange, particle.velocity, particle.vRange, Color.color(particle.r, particle.g, particle.b), particle.particleLifeSpan, particle.generatorLifeSpan, particle.x, particle.y, particle.friction, particle.orderView);
+                rf.makeParticleGenerator(particle.generateInterval, particle.direction, particle.dRange, particle.velocity, particle.vRange, particle.radius, particle.rRange, Color.color(particle.r, particle.g, particle.b, particle.a), particle.particleLifeSpan, particle.generatorLifeSpan, particle.x, particle.y, particle.friction, particle.orderView);
             }
 
         }

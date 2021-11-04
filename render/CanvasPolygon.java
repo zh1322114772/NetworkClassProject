@@ -19,6 +19,7 @@ public class CanvasPolygon {
     private Color color;
     private double[] polygonX;
     private double[] polygonY;
+    private boolean visible = true;
 
     /**
      * @param v number of vertex points of the polygon
@@ -66,11 +67,23 @@ public class CanvasPolygon {
     }
 
     /**
+     * set polygon visible status
+     * @param v true = visible , false invisible
+     * */
+    public void setVisible(boolean v)
+    {
+        visible = v;
+    }
+
+    /**
      * render polygon
      * @gc canvas graphic context
      * */
     public void draw(GraphicsContext gc)
     {
+        //if is invisible
+        if(!visible) return;
+
         //make polygon and add offset
         for(int i = 0; i< polygonX.length; i++)
         {

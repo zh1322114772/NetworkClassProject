@@ -5,12 +5,12 @@ import b451_Project.global.WindowVariables;
 /**
  * player ship entity class
  * */
-public class Ship extends FriendlyEntity{
+public class Ship extends Entity implements FriendlyEntity{
 
     public Ship(float x, float y)
     {
         super(x, y, 0, 0, 20, 100);
-        rotation = 30;
+        rotation = -90;
     }
 
     @Override
@@ -44,6 +44,16 @@ public class Ship extends FriendlyEntity{
     @Override
     public void collision(Entity[] collisionList, int from, int to)
     {
-        System.out.println("ouch" + from + " " + to);
+        //ship died
+        if(hp <= 0) return;
+
+        for(int i= from ; i < to; i++)
+        {
+            //when ship collided with harmful entities
+            if(collisionList[i] instanceof HarmfulEntity)
+            {
+                hp = (hp - collisionList[i].hp < 0) ? 0f : (hp - collisionList[i].hp);
+            }
+        }
     }
 }

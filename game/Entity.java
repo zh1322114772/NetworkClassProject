@@ -24,7 +24,7 @@ public abstract class Entity implements Serializable {
     public float collisionCircleRange = 0;
 
     public boolean alive = true;
-
+    public float hp;
     //collision callback
     /**
      * object collision callback
@@ -40,14 +40,16 @@ public abstract class Entity implements Serializable {
      * @param vx entity x velocity
      * @param vy entity y velocity
      * @param range entity collision boundary range
+     * @param hp entity health
      * */
-    public Entity(float x, float y, float vx, float vy, float range)
+    public Entity(float x, float y, float vx, float vy, float range, float hp)
     {
         this.x = x;
         this.y = y;
         this.vx = vx;
         this.vy = vy;
         this.collisionCircleRange = range;
+        this.hp = hp;
     }
 
     /**

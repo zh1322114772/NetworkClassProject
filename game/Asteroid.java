@@ -4,10 +4,15 @@ import b451_Project.global.GameVariables;
 import b451_Project.global.WindowVariables;
 import javafx.scene.paint.Color;
 
-public class Asteroid extends HarmfulEntity{
+import java.util.ArrayList;
+
+public class Asteroid extends Entity implements HarmfulEntity, AIEntity{
+
+    private float randomRotation;
 
     public Asteroid(float x, float y) {
         super(x, y, 0, 0, 20, 10);
+        randomRotation = (float)(Math.random() * 30) - 15f;
     }
 
     @Override
@@ -28,13 +33,20 @@ public class Asteroid extends HarmfulEntity{
             //when asteroid collided with friendly entities
             if(collisionList[i] instanceof FriendlyEntity)
             {
+                //attack only if object has health
+                if(collisionList[i].hp <=0)
+                {
+                    continue;
+                }
+
                 //explosion effect
                 ParticlePlayer p = new ParticlePlayer();
                 Color c = Color.ORANGE;
                 p.r = (float) c.getRed();
                 p.b = (float)c.getBlue();
                 p.g = (float)c.getGreen();
-                p.generateInterval = 0.005f;
+                p.a = 0.5f;
+                p.generateInterval = 0.0005f;
                 p.direction = 0;
                 p.dRange = 180;
                 p.velocity = 20;
@@ -42,7 +54,9 @@ public class Asteroid extends HarmfulEntity{
                 p.friction = 0.95f;
                 p.orderView = 0;
                 p.particleLifeSpan = 0.3f;
-                p.generatorLifeSpan = 1f;
+                p.generatorLifeSpan = 0.5f;
+                p.radius = 4;
+                p.rRange = 4;
                 p.x = x;
                 p.y = y;
 
@@ -53,5 +67,10 @@ public class Asteroid extends HarmfulEntity{
                 break;
             }
         }
+    }
+
+    @Override
+    public void tick(ArrayList<Entity> e, double dt) {
+        rotation += randomRotation;
     }
 }

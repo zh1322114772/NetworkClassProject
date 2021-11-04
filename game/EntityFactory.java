@@ -24,8 +24,17 @@ public class EntityFactory {
     private Entity[] collisionList = new Entity[1024];
 
 
-    public void tick()
+    public void tick(double dt)
     {
+        //apply AI Tick
+        for(Entity e: objects)
+        {
+            if(e instanceof AIEntity)
+            {
+                ((AIEntity)e).tick(objects, dt);
+            }
+        }
+
         //remove objects
         for(int i = objects.size() - 1; i>=0; i--)
         {
@@ -148,6 +157,18 @@ public class EntityFactory {
         Asteroid a = new Asteroid(x, y);
         assignID(a);
         return a;
+    }
+
+    /**
+     * create a new instance of harmful missile entity
+     * @param x asteroid x location
+     * @param y asteroid y location
+     * */
+    public Missile makeMissile(float x, float y)
+    {
+        Missile m = new Missile(x, y);
+        assignID(m);
+        return m;
     }
 
     public ArrayList<Entity> getEntityList()
