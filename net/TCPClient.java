@@ -1,7 +1,6 @@
 package b451_Project.net;
 
 import b451_Project.global.ConfigVariables;
-import b451_Project.net.packets.HelloPacket;
 import b451_Project.net.packets.PacketBase;
 import b451_Project.utils.Timer;
 
@@ -10,7 +9,6 @@ import java.net.Socket;
 
 public abstract class TCPClient {
     private SocketWrapper client;
-    long timeStamp = 0;
     private Timer loopThread;
 
     TCPClient(String hostAddress) throws IOException
@@ -21,7 +19,6 @@ public abstract class TCPClient {
         //client tick loop thread
         loopThread.start((d)->
         {
-            long halfTimeOut = ConfigVariables.CONNECTION_TIMEOUT / 2;
             synchronized (this)
             {
                 //check if new arrival packets from server
@@ -33,11 +30,6 @@ public abstract class TCPClient {
                 //tick
                 tick(d);
 
-                //check if it's necessary to send the hello packet
-                if(System.currentTimeMillis() - timeStamp > halfTimeOut)
-                {
-                    sendPacket(new HelloPacket());
-                }
             }
 
         }, 1.0/ConfigVariables.GAME_TICK_RATE);
@@ -65,22 +57,17 @@ public abstract class TCPClient {
      * */
     public void sendPacket(PacketBase p)
     {
+
         synchronized (this)
         {
-            try
+
+            client.sendPacket(p);
+            if(client.isClosed())
             {
-                client.sendPacket(p);
-                timeStamp = System.currentTimeMillis();
-            }catch(IOException e)
-            {
-                System.out.println(e);
-                e.printStackTrace();
-                //unable to communicate with server
                 disconnected();
                 stop();
             }
         }
-
     }
 
     /**

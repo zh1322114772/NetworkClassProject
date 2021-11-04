@@ -16,8 +16,8 @@ import java.util.Random;
 public class GameServer extends TCPServer{
 
     //ship movement variables
-    public static final float MAX_SHIP_SPEED = 40.0f;
-    public static final float SHIP_ACCELERATION = 20.0f;
+    public static final float MAX_SHIP_SPEED = 60.0f;
+    public static final float SHIP_ACCELERATION = 30.0f;
     public static final float SHIP_FRICTION = 0.8f;
 
     //player info

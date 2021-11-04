@@ -1,6 +1,5 @@
 package b451_Project.net;
 import b451_Project.global.ConfigVariables;
-import b451_Project.net.packets.HelloPacket;
 import b451_Project.net.packets.PacketBase;
 import b451_Project.utils.Timer;
 import java.io.IOException;
@@ -17,7 +16,6 @@ public abstract class TCPServer {
     //client socket list
     private ServerSocket server;
     private ArrayList<SocketWrapper> clientSockets = new ArrayList<SocketWrapper>();
-    private ArrayList<Long> clientTimestamp = new ArrayList<Long>();
 
     private Thread connectionListenThread = new Thread();
     private Timer loopThread = new Timer(false);
@@ -43,7 +41,6 @@ public abstract class TCPServer {
                     {
                         //establish connection
                         clientSockets.add(new SocketWrapper(client));
-                        clientTimestamp.add(System.currentTimeMillis());
                         handle = clientSockets.size() - 1;
                         clientConnected(handle);
                     }
@@ -72,28 +69,10 @@ public abstract class TCPServer {
                     while(clientSockets.get(i).available())
                     {
                         //avoid hello packet
-                        PacketBase p = clientSockets.get(i).getData();
-                        if(!(p instanceof HelloPacket))
-                        {
-                            packetReceived(p, i);
-                        }
-                        //update client timestamp
-                        clientTimestamp.set(i, System.currentTimeMillis());
+                        packetReceived(clientSockets.get(i).getData(), i);
                     }
-
                 }
 
-                //client timeout check
-                for(int i = clientTimestamp.size() - 1; i>=0; i--)
-                {
-                    if((currentMS - clientTimestamp.get(i).longValue()) > ConfigVariables.CONNECTION_TIMEOUT)
-                    {
-                        clientDisconnected(i);
-                        //force close socket
-                        disconnect(i);
-                    }
-
-                }
 
                 tick(d);
             }
@@ -169,7 +148,6 @@ public abstract class TCPServer {
             {
                 clientSockets.get(handle).close();
                 clientSockets.remove(handle);
-                clientTimestamp.remove(handle);
             }
         }
     }
@@ -185,17 +163,12 @@ public abstract class TCPServer {
         {
             if(handle < clientSockets.size())
             {
-                try
-                {
-                    clientSockets.get(handle).sendPacket(p);
-                    return true;
-                }catch(IOException e)
+                clientSockets.get(handle).sendPacket(p);
+                if(clientSockets.get(handle).isClosed())
                 {
                     clientDisconnected(handle);
                     //force close socket
                     disconnect(handle);
-                    System.out.println(e);
-                    e.printStackTrace();
                 }
             }
             return false;

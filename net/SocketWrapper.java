@@ -1,6 +1,9 @@
 package b451_Project.net;
 
+import b451_Project.global.ConfigVariables;
+import b451_Project.global.WindowVariables;
 import b451_Project.net.packets.PacketBase;
+import b451_Project.utils.Timer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,7 +21,7 @@ public class SocketWrapper {
     private ObjectInputStream receiver;
     private ObjectOutputStream sender;
     private Thread receiveThread;
-    private Queue<PacketBase> data;
+    private Queue<PacketBase> receiveBuffer;
 
     private volatile boolean threadFlag;
 
@@ -27,7 +30,7 @@ public class SocketWrapper {
         socket = s;
         sender = new ObjectOutputStream(s.getOutputStream());
         receiver = new ObjectInputStream(s.getInputStream());
-        data = new LinkedList<PacketBase>();
+        receiveBuffer = new LinkedList<PacketBase>();
         threadFlag = true;
 
         //data receive thread
@@ -42,7 +45,7 @@ public class SocketWrapper {
                     {
                         synchronized (this)
                         {
-                            data.offer((PacketBase)p);
+                            receiveBuffer.offer((PacketBase)p);
                         }
                     }
                 }catch(Exception e)
@@ -55,6 +58,7 @@ public class SocketWrapper {
             close();
 
         });
+
         receiveThread.start();
     }
 
@@ -65,8 +69,13 @@ public class SocketWrapper {
     {
         synchronized (this)
         {
-            return !data.isEmpty();
+            return !receiveBuffer.isEmpty();
         }
+    }
+
+    public boolean isClosed()
+    {
+        return socket.isClosed();
     }
 
     /**
@@ -76,15 +85,26 @@ public class SocketWrapper {
     {
         synchronized (this)
         {
-            return data.poll();
+            return receiveBuffer.poll();
         }
     }
 
-    public void sendPacket(PacketBase p) throws IOException
+    public void sendPacket(PacketBase p)
     {
-        sender.reset();
-        sender.writeObject(p);
-        sender.flush();
+        synchronized (this)
+        {
+            try
+            {
+                sender.reset();
+                sender.writeObject(p);
+                sender.flush();
+            }catch (IOException e)
+            {
+                System.out.println(e);
+                e.printStackTrace();
+                close();
+            }
+        }
     }
 
     /**
@@ -98,12 +118,14 @@ public class SocketWrapper {
             {
                 try
                 {
+                    threadFlag = false;
                     socket.close();
                     sender.close();
                     receiver.close();
                 }catch(IOException e)
                 {
-
+                    System.out.println(e);
+                    e.printStackTrace();
                 }
             }
         }
