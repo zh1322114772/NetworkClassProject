@@ -1,7 +1,10 @@
 package b451_Project.scenes;
+import b451_Project.render.CanvasPolygon;
 import b451_Project.utils.Timer;
+import javafx.animation.AnimationTimer;
 import javafx.scene.*;
 import b451_Project.global.WindowVariables;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
@@ -10,13 +13,17 @@ public abstract class SceneBase {
 
     protected Scene scene;
     protected Pane pane;
+    protected Canvas canvas;
     private boolean mousePressed = false;
-    private Timer timer;
+    private AnimationTimer timer;
+
+    private long oldTimestamp = 0;
 
     public SceneBase()
     {
-        timer = new Timer(false);
         pane = new Pane();
+        canvas = new Canvas(WindowVariables.WINDOW_WIDTH, WindowVariables.WINDOW_HEIGHT);
+        pane.getChildren().add(canvas);
         scene = new Scene(pane, WindowVariables.WINDOW_WIDTH, WindowVariables.WINDOW_HEIGHT);
 
         //size changed listener
@@ -90,14 +97,18 @@ public abstract class SceneBase {
      * */
     public void enable()
     {
-        //start repaint thread
-        timer.start((deltaT) ->
-        {
-            synchronized (this)
-            {
-                sceneRedraw(deltaT);
+        oldTimestamp = System.nanoTime();
+        timer = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                synchronized (this)
+                {
+                    sceneRedraw((double)(l - oldTimestamp)/1e+9);
+                }
+                oldTimestamp = l;
             }
-        }, 1.0 / WindowVariables.WINDOW_FRAME_RATE);
+        };
+        timer.start();
 
         synchronized (this)
         {

@@ -27,7 +27,7 @@ public class GameScene extends SceneBase {
     @Override
     public void enable()
     {
-        renderFactory = new RenderFactory(this.pane);
+        renderFactory = new RenderFactory(this.canvas);
         super.enable();
 
     }

@@ -17,5 +17,5 @@ public class ParticlePlayer implements Serializable {
     public float x;
     public float y;
     public float friction;
-    public float orderView;
+    public int orderView;
 }

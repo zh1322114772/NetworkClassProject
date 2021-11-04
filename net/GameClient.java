@@ -39,14 +39,14 @@ public class GameClient extends TCPClient{
     private boolean joinedGame = false;
 
     //map from Object ID -> (Polygon ID, Validate, Particle Generator ID)
-    private HashMap<Integer, Triplet<Integer, Boolean, ArrayList<Integer>>> tickObject2RenderObject;
+    private HashMap<Integer, Triplet<Long, Boolean, ArrayList<Integer>>> tickObject2RenderObject;
 
 
 
     public GameClient(String hostAddress) throws IOException
     {
         super(hostAddress);
-        tickObject2RenderObject = new HashMap<Integer, Triplet<Integer, Boolean, ArrayList<Integer>>>();
+        tickObject2RenderObject = new HashMap<Integer, Triplet<Long, Boolean, ArrayList<Integer>>>();
     }
 
     /**
@@ -115,30 +115,35 @@ public class GameClient extends TCPClient{
             RenderFactory rf = WindowVariables.gameScene.getRenderFactory();
             for(Entity e : tp.entities)
             {
-                Triplet<Integer, Boolean, ArrayList<Integer>> triplet = tickObject2RenderObject.get(e.ID);
+                Triplet<Long, Boolean, ArrayList<Integer>> triplet = tickObject2RenderObject.get(e.ID);
                 //if element doesn't exist, then it must be new object
                 if(triplet == null)
                 {
-                    Integer id = 0;
+                    Long id = 0l;
                     ArrayList<Integer> ef = new ArrayList<Integer>();
 
                     if(e instanceof Ship)
                     {
                         //particle effects
-                        Integer flame0 = rf.makeParticleGenerator(0.03f, 90, 10, 12, 4, Color.RED, 0.5f, -1, e.x, e.y, 1f, 1);
-                        Integer flame1 = rf.makeParticleGenerator(0.03f, 90, 7, 12, 4, Color.YELLOW, 0.5f, -1, e.x, e.y, 1f, 1);
+                        Integer flame0 = rf.makeParticleGenerator(0.01f, 90, 10, 16, 4, Color.color(1, 0, 0, 0.5), 0.5f, -1, e.x, e.y, 1f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.01f, 90, 7, 16, 4, Color.color(1, 1, 0, 0.5), 0.5f, -1, e.x, e.y, 1f, 2);
                         ef.add(flame0);
                         ef.add(flame1);
 
                         //ship
-                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BLUE, 3, 40, 0.5f, e.rotation, e.x, e.y);
+                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BLUE, 3, 40, 1, e.rotation, e.x, e.y);
                     }else if(e instanceof Asteroid)
                     {
-                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BROWN, 8, 40, 0.4f, e.rotation, e.x, e.y);
+                        Integer flame0 = rf.makeParticleGenerator(0.02f, (float)Math.toDegrees(e.rotation), 30, 17, 4, Color.color(0.3, 0.3, 0.3, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.02f, (float)Math.toDegrees(e.rotation), 30, 17, 4, Color.color(0.5, 0.5, 0.5, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
+                        ef.add(flame0);
+                        ef.add(flame1);
+
+                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BROWN, 8, 40, 0, e.rotation, e.x, e.y);
                     }
 
                     //add to hashmap
-                    triplet = new Triplet<Integer, Boolean, ArrayList<Integer>>(id, true, ef);
+                    triplet = new Triplet<Long, Boolean, ArrayList<Integer>>(id, true, ef);
                     tickObject2RenderObject.put(e.ID, triplet);
                 }else
                 {
@@ -161,10 +166,10 @@ public class GameClient extends TCPClient{
             }
 
             //remove died objects
-            Iterator<Triplet<Integer, Boolean, ArrayList<Integer>>> objIterator = tickObject2RenderObject.values().iterator();
+            Iterator<Triplet<Long, Boolean, ArrayList<Integer>>> objIterator = tickObject2RenderObject.values().iterator();
             while(objIterator.hasNext())
             {
-                Triplet<Integer, Boolean, ArrayList<Integer>> triplet = objIterator.next();
+                Triplet<Long, Boolean, ArrayList<Integer>> triplet = objIterator.next();
 
                 //remove outdated objects
                 if(!triplet.second)

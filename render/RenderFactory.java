@@ -1,6 +1,7 @@
 package b451_Project.render;
 import b451_Project.global.ConfigVariables;
 import javafx.application.Platform;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
@@ -40,6 +41,9 @@ public class RenderFactory {
         public float intRotate = 0;
         public float oldRotate = 0;
 
+        //layer
+        public int layer = 0;
+
         public RenderableObjectWrapper(T obj, float lifeSpan, float objectUpdateInterval)
         {
             this.lifeSpan = lifeSpan;
@@ -49,15 +53,22 @@ public class RenderFactory {
 
     }
 
-    private HashMap<Integer ,RenderableObjectWrapper<Polygon>> polygons;
+    private ArrayList<HashMap<Integer ,RenderableObjectWrapper<CanvasPolygon>>> polygons;
     private HashMap<Integer ,RenderableObjectWrapper<ParticleGenerator>> particles;
-    private Pane pane;
+    private Canvas canvas;
     private int counter = 0;
 
-    public RenderFactory(Pane p)
+    public RenderFactory(Canvas p)
     {
-        this.pane = p;
-        polygons = new HashMap<Integer ,RenderableObjectWrapper<Polygon>>();
+        this.canvas = p;
+        polygons = new ArrayList<HashMap<Integer ,RenderableObjectWrapper<CanvasPolygon>>>();
+
+        //five layers
+        for(int i=0;i < 5; i++)
+        {
+            polygons.add(new HashMap<Integer ,RenderableObjectWrapper<CanvasPolygon>>());
+        }
+
         particles = new HashMap<Integer, RenderableObjectWrapper<ParticleGenerator>>();
     }
 
@@ -75,13 +86,13 @@ public class RenderFactory {
      * @param c color of the polygon
      * @param vertices number of vertex points of the polygon
      * @param rad polygon radius
-     * @param viewOrder set z-depth value of the polygon
+     * @param viewOrder set z-depth value of the polygon from 0-5
      * @param rotate rotate polygon in degree
      * @param x polygon x center location
      * @param y polygon y center location
      * @return polygon ID
      * */
-    public synchronized int makePolygon(float lifeSpan, float objUpdateInterval, Color c, int vertices, float rad, float viewOrder,float rotate, float x, float y)
+    public synchronized long makePolygon(float lifeSpan, float objUpdateInterval, Color c, int vertices, float rad, int viewOrder,float rotate, float x, float y)
     {
         //radius of a polygon cannot be less than zero
         //must need 3 or more vertices to form a polygon
@@ -91,7 +102,7 @@ public class RenderFactory {
             vertices = 3;
         }
 
-        RenderableObjectWrapper<Polygon> polygon = new RenderableObjectWrapper<Polygon>(new Polygon(), lifeSpan, objUpdateInterval);
+        RenderableObjectWrapper<CanvasPolygon> polygon = new RenderableObjectWrapper<CanvasPolygon>(new CanvasPolygon(vertices, rad), lifeSpan, objUpdateInterval);
         polygon.newX = x;
         polygon.newY =y;
         polygon.intX = x;
@@ -102,31 +113,28 @@ public class RenderFactory {
         polygon.intRotate = rotate;
         polygon.newRotate = rotate;
 
-        polygon.obj.setViewOrder(viewOrder);
-        polygon.obj.getPoints().removeAll();
-        Double[] v = new Double[vertices * 2];
-        double deltaRadian = Math.toRadians(360.0/vertices);
-
-        for(int i = 0; i < vertices; i++)
+        //layer must be 0 - 4
+        if(viewOrder < 0)
         {
-            v[(i * 2)] = Math.cos(i * deltaRadian) * rad;
-            v[(i * 2) + 1] = Math.sin(i * deltaRadian) * rad;
+            polygon.layer = 0;
+        }else if(viewOrder > 4)
+        {
+            polygon.layer = 4;
+        }else
+        {
+            polygon.layer = viewOrder;
         }
 
-        polygon.obj.getPoints().addAll(v);
-        polygon.obj.setFill(c);
-        Platform.runLater(() ->
-        {
-            pane.getChildren().add(polygon.obj);
-            polygon.obj.setLayoutX(x);
-            polygon.obj.setLayoutY(y);
-            polygon.obj.setRotate(rotate);
-        });
+        //set init position
+        polygon.obj.setLocation(x, y);
+        polygon.obj.setRotation(rotate);
+        polygon.obj.setColor(c);
 
         //add to hashmap
         int id = getID();
-        polygons.put(id, polygon);
-        return id;
+        polygons.get(polygon.layer).put(id, polygon);
+
+        return (long)id + ((long)polygon.layer << 32);
     }
 
     /**
@@ -134,9 +142,12 @@ public class RenderFactory {
      * @param polygonID polygon id
      * @param deg degree
      * */
-    public synchronized void setPolygonRotation(int polygonID, float deg)
+    public synchronized void setPolygonRotation(long polygonID, float deg)
     {
-        RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
+        int id = (int)(polygonID & (0xffffffffl));
+        int layer = (int)(polygonID >> 32);
+
+        RenderableObjectWrapper<CanvasPolygon> polygon = polygons.get(layer).get(id);
         if(polygon != null)
         {
             polygon.newRotate = deg;
@@ -149,9 +160,12 @@ public class RenderFactory {
      * @param x polygon x center location
      * @param y polygon y center location
      * */
-    public synchronized void setPolygonCenterLocation(int polygonID, float x, float y)
+    public synchronized void setPolygonCenterLocation(long polygonID, float x, float y)
     {
-        RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
+        int id = (int)(polygonID & (0xffffffffl));
+        int layer = (int)(polygonID >> 32);
+
+        RenderableObjectWrapper<CanvasPolygon> polygon = polygons.get(layer).get(id);
         if(polygon != null)
         {
             polygon.newX = x;
@@ -163,9 +177,12 @@ public class RenderFactory {
      * destroy a visible polygon
      * @param polygonID
      * */
-    public synchronized void setPolygonDestroy(int polygonID)
+    public synchronized void setPolygonDestroy(long polygonID)
     {
-        RenderableObjectWrapper<Polygon> polygon = polygons.get(polygonID);
+        int id = (int)(polygonID & (0xffffffffl));
+        int layer = (int)(polygonID >> 32);
+
+        RenderableObjectWrapper<CanvasPolygon> polygon = polygons.get(layer).get(id);
         if(polygon != null)
         {
             polygon.lifeSpan = 0;
@@ -185,9 +202,9 @@ public class RenderFactory {
      * @param x particle generator x location
      * @param y particle generator y location
      * @param friction particle friction
-     * @param orderView z-depth value
+     * @param orderView z-depth value must between 0-4
      * */
-    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, float orderView)
+    public synchronized int makeParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float particleLifeSpan, float generatorLifeSpan, float x, float y, float friction, int orderView)
     {
         ParticleGenerator p = new ParticleGenerator(generateInterval, direction, dRange, velocity, vRange, color, particleLifeSpan, x, y, friction, orderView, this);
         RenderableObjectWrapper<ParticleGenerator> rp = new RenderableObjectWrapper<ParticleGenerator>(p, generatorLifeSpan, 1.0f/ ConfigVariables.GAME_TICK_RATE);
@@ -257,6 +274,10 @@ public class RenderFactory {
      * */
     public synchronized void render(double deltaT)
     {
+        //refresh
+        canvas.getGraphicsContext2D().setFill(Color.WHITE);
+        canvas.getGraphicsContext2D().fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
         //render all particles
         for(Integer i : particles.keySet())
         {
@@ -307,56 +328,50 @@ public class RenderFactory {
             p.obj.setRotation(p.oldRotate);
         }
 
-        //update time span, delete all died polygons and render all polygons
-        Iterator<RenderableObjectWrapper<Polygon>> polygonIterator = polygons.values().iterator();
-        while (polygonIterator.hasNext()) {
-            RenderableObjectWrapper<Polygon> p = polygonIterator.next();
+        for(int i = 4; i>=0; i--)
+        {
+            //update time span, delete all died polygons and render all polygons
+            Iterator<RenderableObjectWrapper<CanvasPolygon>> polygonIterator = polygons.get(i).values().iterator();
+            while (polygonIterator.hasNext()) {
+                RenderableObjectWrapper<CanvasPolygon> p = polygonIterator.next();
 
-            //update lifespan
-            if (p.lifeSpan != -1) {
-                p.lifeSpan -= deltaT;
+                //update lifespan
+                if (p.lifeSpan != -1) {
+                    p.lifeSpan -= deltaT;
 
-                if (p.lifeSpan <= 0) {
-                    Platform.runLater(() ->
-                    {
-                        pane.getChildren().remove(p.obj);
-                    });
-                    polygonIterator.remove();
-                    continue;
-                }
-            }
-
-            //update location and rotation
-            if (p.objectUpdateInterval == -1) {
-                Platform.runLater(() ->
-                {
-                    p.obj.setLayoutX(p.newX);
-                    p.obj.setLayoutY(p.newY);
-                    p.obj.setRotate(p.newRotate);
-                });
-            } else {
-                //make animation between last and newest point
-                p.objectIntervalCounter += deltaT;
-                if (p.objectIntervalCounter >= p.objectUpdateInterval) {
-                    p.objectIntervalCounter %= p.objectUpdateInterval;
-
-                    p.intRotate = p.newRotate;
-                    p.intX = p.newX;
-                    p.intY = p.newY;
+                    if (p.lifeSpan <= 0) {
+                        polygonIterator.remove();
+                        continue;
+                    }
                 }
 
-                //non-linear animation
-                p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
-                p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
-                p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
-                Platform.runLater(() ->
-                {
-                    p.obj.setLayoutX(p.oldX);
-                    p.obj.setLayoutY(p.oldY);
-                    p.obj.setRotate(p.oldRotate);
-                });
-            }
+                //update location and rotation
+                if (p.objectUpdateInterval == -1) {
+                    p.obj.setLocation(p.newX, p.newY);
+                    p.obj.setRotation(p.newRotate);
+                } else {
+                    //make animation between last and newest point
+                    p.objectIntervalCounter += deltaT;
+                    if (p.objectIntervalCounter >= p.objectUpdateInterval) {
+                        p.objectIntervalCounter %= p.objectUpdateInterval;
 
+                        p.intRotate = p.newRotate;
+                        p.intX = p.newX;
+                        p.intY = p.newY;
+                    }
+
+                    //non-linear animation
+                    p.oldX = p.oldX + ((p.intX - p.oldX) * 0.2f);
+                    p.oldY = p.oldY + ((p.intY - p.oldY) * 0.2f);
+                    p.oldRotate = p.oldRotate + ((p.intRotate - p.oldRotate) * 0.2f);
+
+                    p.obj.setLocation(p.oldX , p.oldY);
+                    p.obj.setRotation(p.oldRotate);
+                }
+
+                //render
+                p.obj.draw(canvas.getGraphicsContext2D());
+            }
         }
 
     }

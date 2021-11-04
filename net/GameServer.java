@@ -100,10 +100,15 @@ public class GameServer extends TCPServer{
     private void gameLogicProcess(double d)
     {
         //generate asteroid
-        if(ranGen.nextFloat() > 0.85)
+        if(ranGen.nextFloat() > 0.8)
         {
+            float shootingDirection = (float)(Math.random() * 1.5707963) + 0.78539815f;
+            float shootingVelocity = (float)(Math.random() * 60) + 15;
+
             Asteroid a = ef.makeAsteroid(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
-            a.vy = 35;
+            a.vy = (float)Math.sin(shootingDirection) * shootingVelocity;
+            a.vx = (float)Math.cos(shootingDirection) * shootingVelocity;
+            a.rotation = shootingDirection + 3.1415926f;
         }
 
     }

@@ -34,15 +34,15 @@ public class Asteroid extends HarmfulEntity{
                 p.r = (float) c.getRed();
                 p.b = (float)c.getBlue();
                 p.g = (float)c.getGreen();
-                p.generateInterval = 0.01f;
+                p.generateInterval = 0.005f;
                 p.direction = 0;
                 p.dRange = 180;
-                p.velocity = 30;
+                p.velocity = 20;
                 p.vRange = 5;
-                p.friction = 0.85f;
-                p.orderView = 0.3f;
-                p.particleLifeSpan = 0.15f;
-                p.generatorLifeSpan = 0.5f;
+                p.friction = 0.95f;
+                p.orderView = 0;
+                p.particleLifeSpan = 0.3f;
+                p.generatorLifeSpan = 1f;
                 p.x = x;
                 p.y = y;
 

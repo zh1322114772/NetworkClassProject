@@ -15,7 +15,7 @@ public class ParticleGenerator {
 
     class Particle
     {
-        public int objectID;
+        public long objectID;
         public float vx;
         public float vy;
         public float x;
@@ -33,7 +33,7 @@ public class ParticleGenerator {
     private float friction;
     private float x;
     private float y;
-    private float orderView;
+    private int orderView;
     private ArrayList<Particle> particleList;
     private double intervalCounter = 0;
     RenderFactory rf;
@@ -53,7 +53,7 @@ public class ParticleGenerator {
      * @param orderView z-depth value
      * @param rf render factory instance
      * */
-    public ParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float lifeSpan, float x, float y, float friction, float orderView, RenderFactory rf)
+    public ParticleGenerator(float generateInterval, float direction, float dRange, float velocity, float vRange, Color color, float lifeSpan, float x, float y, float friction, int orderView, RenderFactory rf)
     {
         //particles must have lifeSpan
         if(lifeSpan == -1)
