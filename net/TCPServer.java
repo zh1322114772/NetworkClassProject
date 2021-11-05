@@ -68,7 +68,6 @@ public abstract class TCPServer {
                 {
                     while(clientSockets.get(i).available())
                     {
-                        //avoid hello packet
                         packetReceived(clientSockets.get(i).getData(), i);
                     }
                 }

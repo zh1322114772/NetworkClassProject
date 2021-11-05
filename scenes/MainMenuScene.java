@@ -10,6 +10,7 @@ import javafx.scene.input.KeyCode;
 import b451_Project.global.*;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 // this is the main menu scene of the game
 

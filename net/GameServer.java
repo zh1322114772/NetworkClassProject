@@ -198,6 +198,8 @@ public class GameServer extends TCPServer{
     @Override
     protected void packetReceived(PacketBase p, int handle) {
 
+        System.out.println((p instanceof JoinPacket) + " " + handle);
+
         //player join packet
         if(p instanceof JoinPacket)
         {

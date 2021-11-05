@@ -5,6 +5,7 @@ import b451_Project.net.packets.PacketBase;
 import b451_Project.utils.Timer;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public abstract class TCPClient {
@@ -13,7 +14,8 @@ public abstract class TCPClient {
 
     TCPClient(String hostAddress) throws IOException
     {
-        client = new SocketWrapper(new Socket(hostAddress, ConfigVariables.SERVER_PORT));
+        System.out.println(InetAddress.getByName(hostAddress));
+        client = new SocketWrapper(new Socket(InetAddress.getByName(hostAddress), ConfigVariables.SERVER_PORT));
         loopThread = new Timer(false);
 
         //client tick loop thread
@@ -29,7 +31,6 @@ public abstract class TCPClient {
 
                 //tick
                 tick(d);
-
             }
 
         }, 1.0/ConfigVariables.GAME_TICK_RATE);
@@ -62,6 +63,7 @@ public abstract class TCPClient {
         {
 
             client.sendPacket(p);
+
             if(client.isClosed())
             {
                 disconnected();
