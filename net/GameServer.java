@@ -31,6 +31,10 @@ public class GameServer extends TCPServer{
     private Ship[] playerShipEntities = new Ship[2];
     private TickPacket tp;
     private Random ranGen;
+
+    private double bulletTicker = 0;
+
+
     private void startNewRound()
     {
         ef = new EntityFactory();
@@ -113,10 +117,10 @@ public class GameServer extends TCPServer{
         }
 
         //generate asteroid
-        if(ranGen.nextFloat() > 0.9)
+        if(ranGen.nextFloat() > 0.95)
         {
             float shootingDirection = (float)(Math.random() * 1.5707963) + 0.78539815f;
-            float shootingVelocity = (float)(Math.random() * 80) + 20;
+            float shootingVelocity = (float)(Math.random() * 1) + 20;
 
             Asteroid a = ef.makeAsteroid(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
             a.vy = (float)Math.sin(shootingDirection) * shootingVelocity;
@@ -125,10 +129,34 @@ public class GameServer extends TCPServer{
         }
 
         //generate missile
-        if(ranGen.nextFloat() > 0.97)
+        if(ranGen.nextFloat() > 1.1)
         {
             ef.makeMissile(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
         }
+
+        //generate bullets
+        if(bulletTicker > 0.1)
+        {
+            bulletTicker = 0;
+
+            //player1 shoot missile
+            if(playerShipEntities[0].hp >0)
+            {
+                //ef.makeBullet(playerShipEntities[0].x, playerShipEntities[0].y, -5, -60);
+                //ef.makeBullet(playerShipEntities[0].x, playerShipEntities[0].y, 0, -60);
+                //ef.makeBullet(playerShipEntities[0].x, playerShipEntities[0].y, 5, -60);
+            }
+
+            //player2 shoot missile
+            if(playerShipEntities[1].hp >0)
+            {
+                //ef.makeBullet(playerShipEntities[1].x, playerShipEntities[1].y, -5, -60);
+                //ef.makeBullet(playerShipEntities[1].x, playerShipEntities[1].y, 0, -60);
+                //ef.makeBullet(playerShipEntities[1].x, playerShipEntities[1].y, 5, -60);
+            }
+
+        }
+        bulletTicker+=d;
 
     }
 
@@ -197,8 +225,6 @@ public class GameServer extends TCPServer{
 
     @Override
     protected void packetReceived(PacketBase p, int handle) {
-
-        System.out.println((p instanceof JoinPacket) + " " + handle);
 
         //player join packet
         if(p instanceof JoinPacket)

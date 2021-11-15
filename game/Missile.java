@@ -54,32 +54,7 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
             // check if missile survived more than 15 seconds
             else if(counter >= EXPLODE_TIME)
             {
-                alive = false;
-
-                //explosion effect
-                ParticlePlayer p = new ParticlePlayer();
-                Color c = Color.ORANGE;
-                p.r = (float) c.getRed();
-                p.b = (float)c.getBlue();
-                p.g = (float)c.getGreen();
-                p.a = 0.5f;
-                p.generateInterval = 0.0005f;
-                p.direction = 0;
-                p.dRange = 180;
-                p.velocity = 20;
-                p.vRange = 5;
-                p.friction = 0.95f;
-                p.orderView = 0;
-                p.particleLifeSpan = 0.3f;
-                p.generatorLifeSpan = 0.5f;
-                p.radius = 4;
-                p.rRange = 4;
-                p.x = x;
-                p.y = y;
-
-
-                GameVariables.entityFactory.particles.add(p);
-
+                explode();
             }else
             {
                 counter += dt;
@@ -95,8 +70,45 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
 
     }
 
+    private void explode()
+    {
+        //explosion effect
+        ParticlePlayer p = new ParticlePlayer();
+        Color c = Color.ORANGE;
+        p.r = (float) c.getRed();
+        p.b = (float)c.getBlue();
+        p.g = (float)c.getGreen();
+        p.a = 0.5f;
+        p.generateInterval = 0.0005f;
+        p.direction = 0;
+        p.dRange = 180;
+        p.velocity = 20;
+        p.vRange = 5;
+        p.friction = 0.95f;
+        p.orderView = 0;
+        p.particleLifeSpan = 0.3f;
+        p.generatorLifeSpan = 0.5f;
+        p.radius = 4;
+        p.rRange = 4;
+        p.x = x;
+        p.y = y;
+
+
+        GameVariables.entityFactory.particles.add(p);
+
+        alive = false;
+    }
+
     @Override
     public void collision(Entity[] collisionList, int from, int to) {
+
+        //destroy self when hp below zero
+        if(hp <= 0)
+        {
+            explode();
+            return;
+        }
+
         for(int i= from ; i < to; i++)
         {
             //attack only if object has health
@@ -109,29 +121,7 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
             if(collisionList[i] instanceof FriendlyEntity)
             {
                 //explosion effect
-                ParticlePlayer p = new ParticlePlayer();
-                Color c = Color.ORANGE;
-                p.r = (float) c.getRed();
-                p.b = (float)c.getBlue();
-                p.g = (float)c.getGreen();
-                p.a = 0.5f;
-                p.generateInterval = 0.0005f;
-                p.direction = 0;
-                p.dRange = 180;
-                p.velocity = 20;
-                p.vRange = 5;
-                p.friction = 0.95f;
-                p.orderView = 0;
-                p.particleLifeSpan = 0.3f;
-                p.generatorLifeSpan = 0.5f;
-                p.radius = 4;
-                p.rRange = 4;
-                p.x = x;
-                p.y = y;
-
-                GameVariables.entityFactory.particles.add(p);
-
-                alive = false;
+                explode();
                 break;
             }
         }

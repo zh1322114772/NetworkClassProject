@@ -72,6 +72,15 @@ public abstract class TCPServer {
                     }
                 }
 
+                //check disconnected clients
+                for(int i = 0; i < clientSockets.size(); i++)
+                {
+                    if(clientSockets.get(i).isClosed())
+                    {
+                        disconnect(i);
+                        clientDisconnected(i);
+                    }
+                }
 
                 tick(d);
             }

@@ -67,10 +67,15 @@ public class MainMenuScene extends SceneBase {
         //when user click host a game
         hostGameButton.setOnAction((e) ->
         {
-            //run server
+            //stop old server
             if(GameVariables.server != null)
             {
                 GameVariables.server.stop();
+            }
+
+            if(GameVariables.client != null)
+            {
+                GameVariables.client.stop();
             }
 
             try
@@ -101,6 +106,11 @@ public class MainMenuScene extends SceneBase {
         {
             try
             {
+                if(GameVariables.client != null)
+                {
+                    GameVariables.client.stop();
+                }
+
                 GameVariables.client = new GameClient(ipTextField.getText());
                 //send join request
                 GameVariables.client.sendPacket(new JoinPacket());

@@ -1,5 +1,6 @@
 package b451_Project.render;
 import b451_Project.global.ConfigVariables;
+import b451_Project.global.GameVariables;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 
@@ -98,7 +99,7 @@ public class RenderFactory {
             vertices = 3;
         }
 
-        RenderableObjectWrapper<CanvasPolygon> polygon = new RenderableObjectWrapper<CanvasPolygon>(new CanvasPolygon(vertices, rad), lifeSpan, objUpdateInterval);
+        RenderableObjectWrapper<CanvasPolygon> polygon = new RenderableObjectWrapper<CanvasPolygon>(new CanvasPolygon(vertices, rad), lifeSpan, objUpdateInterval * ConfigVariables.MOVEMENT_BUFFER_RATE);
         polygon.newX = x;
         polygon.newY =y;
         polygon.intX = x;

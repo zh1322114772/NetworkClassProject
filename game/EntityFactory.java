@@ -161,8 +161,8 @@ public class EntityFactory {
 
     /**
      * create a new instance of harmful missile entity
-     * @param x asteroid x location
-     * @param y asteroid y location
+     * @param x missile x location
+     * @param y missile y location
      * */
     public Missile makeMissile(float x, float y)
     {

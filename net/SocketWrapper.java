@@ -50,13 +50,13 @@ public class SocketWrapper {
                     }
                 }catch(Exception e)
                 {
+                    e.printStackTrace();
                     break;
                 }
             }
 
             //close socket
             close();
-
         });
 
         receiveThread.start();

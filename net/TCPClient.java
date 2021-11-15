@@ -14,7 +14,6 @@ public abstract class TCPClient {
 
     TCPClient(String hostAddress) throws IOException
     {
-        System.out.println(InetAddress.getByName(hostAddress));
         client = new SocketWrapper(new Socket(InetAddress.getByName(hostAddress), ConfigVariables.SERVER_PORT));
         loopThread = new Timer(false);
 
