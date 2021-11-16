@@ -11,4 +11,6 @@ import java.util.ArrayList;
 public class TickPacket implements PacketBase{
     public ArrayList<Entity> entities;
     public ArrayList<ParticlePlayer> particles;
+    public double survivalTime;
+    public double highestSurvivalTime;
 }

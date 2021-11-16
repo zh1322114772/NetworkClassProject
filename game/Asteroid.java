@@ -11,7 +11,7 @@ public class Asteroid extends Entity implements HarmfulEntity, AIEntity{
     private float randomRotation;
 
     public Asteroid(float x, float y) {
-        super(x, y, 0, 0, 20, 10);
+        super(x, y, 0, 0, 35, 10);
         randomRotation = (float)(Math.random() * 30) - 15f;
     }
 
@@ -76,6 +76,9 @@ public class Asteroid extends Entity implements HarmfulEntity, AIEntity{
                     continue;
                 }
 
+                collisionList[i].hp -= hp;
+                if(collisionList[i].hp < 0) collisionList[i].hp = 0;
+                hp = 0;
                 //explosion effect
                 explode();
                 break;

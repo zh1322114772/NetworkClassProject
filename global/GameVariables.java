@@ -14,5 +14,7 @@ public class GameVariables {
 
     public static EntityFactory entityFactory = null;
 
+    public static volatile double currentScore = 0;
 
+    public static volatile double highestScore = 0;
 }

@@ -59,7 +59,11 @@ public class Timer {
                 }else
                 {
                     try {
-                        Thread.sleep( (desiredWaitTimeNano - waitTime) / 1000000);
+
+                        if((desiredWaitTimeNano - waitTime) > 0)
+                        {
+                            Thread.sleep( (desiredWaitTimeNano - waitTime) / 1000000);
+                        }
                     } catch (InterruptedException e) {}
                 }
             }

@@ -33,7 +33,10 @@ public class GameServer extends TCPServer{
     private Random ranGen;
 
     private double bulletTicker = 0;
-
+    public double shootingInterval = 0;
+    //score
+    private double currentScore = 0;
+    private double highestScore = 0;
 
     private void startNewRound()
     {
@@ -45,6 +48,15 @@ public class GameServer extends TCPServer{
         tp = new TickPacket();
         tp.entities = ef.getEntityList();
         tp.particles = ef.particles;
+
+        //set new highest score
+        if(currentScore > highestScore)
+        {
+            highestScore = currentScore;
+            tp.highestSurvivalTime = highestScore;
+        }
+        currentScore = 0;
+        shootingInterval = 0;
     }
 
     public GameServer() throws IOException
@@ -53,6 +65,11 @@ public class GameServer extends TCPServer{
         playerHandle[0] = -1;
         playerHandle[1] = -1;
         startNewRound();
+    }
+
+    private double sigmoidFUnction(double x)
+    {
+        return 1 / (1 + Math.exp(-x));
     }
 
     private void setShipVelocity(ClientTickPacket t, Ship p)
@@ -111,16 +128,18 @@ public class GameServer extends TCPServer{
 
     private void gameLogicProcess(double d)
     {
+
         if(playerShipEntities[0].hp <= 0 && playerShipEntities[1].hp <= 0)
         {
             inGame = false;
         }
 
         //generate asteroid
-        if(ranGen.nextFloat() > 0.95)
+        // increase gradually by time
+        if(ranGen.nextFloat() > 1 - (Math.tanh(currentScore / 600.0)))
         {
             float shootingDirection = (float)(Math.random() * 1.5707963) + 0.78539815f;
-            float shootingVelocity = (float)(Math.random() * 1) + 20;
+            float shootingVelocity = (float)(Math.random() * Math.tanh(currentScore / 600.0) * 80) + 20;
 
             Asteroid a = ef.makeAsteroid(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
             a.vy = (float)Math.sin(shootingDirection) * shootingVelocity;
@@ -128,31 +147,36 @@ public class GameServer extends TCPServer{
             a.rotation = shootingDirection + 3.1415926f;
         }
 
-        //generate missile
-        if(ranGen.nextFloat() > 1.1)
+        //generate missile after 30 seconds of game duration
+        //increase amount of the asteroid by time
+        if(currentScore > 60)
         {
-            ef.makeMissile(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
+            if(ranGen.nextFloat() > 1 - (Math.tanh(currentScore / 1600.0)))
+            {
+                ef.makeMissile(ranGen.nextFloat() * WindowVariables.WINDOW_WIDTH, -50f);
+            }
+        }
+
+        if(ranGen.nextFloat() > 0.99)
+        {
+            ef.makeHpBlock(ranGen.nextFloat() * WindowVariables.WINDOW_HEIGHT, -50f, 0, 20);
         }
 
         //generate bullets
-        if(bulletTicker > 0.1)
+        if(bulletTicker > sigmoidFUnction(shootingInterval) * 4)
         {
             bulletTicker = 0;
 
-            //player1 shoot missile
+            //player1 shoot friendly missile
             if(playerShipEntities[0].hp >0)
             {
-                //ef.makeBullet(playerShipEntities[0].x, playerShipEntities[0].y, -5, -60);
-                //ef.makeBullet(playerShipEntities[0].x, playerShipEntities[0].y, 0, -60);
-                //ef.makeBullet(playerShipEntities[0].x, playerShipEntities[0].y, 5, -60);
+                ef.makeFriendlyMissile(playerShipEntities[0].x, playerShipEntities[0].y);
             }
 
-            //player2 shoot missile
+            //player2 shoot friendly missile
             if(playerShipEntities[1].hp >0)
             {
-                //ef.makeBullet(playerShipEntities[1].x, playerShipEntities[1].y, -5, -60);
-                //ef.makeBullet(playerShipEntities[1].x, playerShipEntities[1].y, 0, -60);
-                //ef.makeBullet(playerShipEntities[1].x, playerShipEntities[1].y, 5, -60);
+                ef.makeFriendlyMissile(playerShipEntities[1].x, playerShipEntities[1].y);
             }
 
         }
@@ -178,7 +202,9 @@ public class GameServer extends TCPServer{
 
         if(inGame)
         {
+            tp.survivalTime = currentScore;
             gameLogicProcess(d);
+            currentScore += d;
         }
 
         //process logic

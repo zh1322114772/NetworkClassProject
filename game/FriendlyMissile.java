@@ -1,42 +1,45 @@
 package b451_Project.game;
-
 import b451_Project.global.GameVariables;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
-public class Missile extends Entity implements HarmfulEntity, AIEntity{
+/**
+ * Friendly missile that's shoot by players
+ * */
 
-    private static double EXPLODE_TIME = 10;
+public class FriendlyMissile extends Entity implements AIEntity, NeutralEntity{
+
+    private static double EXPLODE_TIME = 15;
     private static float SENSITIVITY = 0.1f;
-    private static float SPEED = 70;
+    private static float SPEED = 100;
 
     // missile explode after 15 second
     private double counter = 0;
 
     //chase target
-    private Ship target = null;
+    private Entity target = null;
 
-    public Missile (float x, float y) {
-        super(x, y, 0, 0, 15, 5);
+    public FriendlyMissile(float x, float y) {
+        super(x, y, 0, -40, 15, 5);
+        rotation = -90;
     }
 
     @Override
-    public void tick(ArrayList<Entity> e, double dt) {
-
+    public void tick(ArrayList<Entity> e, double d) {
         if(target == null)
         {
             //find target
             for(Entity en: e)
             {
-                if(en instanceof Ship)
+                if(en instanceof HarmfulEntity)
                 {
                     if(en.hp <= 0) continue;
 
-                    //ensure choose target between player1 and player2 equally
-                    if(Math.random() > 0.5)
+                    //randomly choose a harmful target
+                    if(Math.random() > (1 - (1d/e.size())))
                     {
-                        target = (Ship)en;
+                        target = en;
                     }
                 }
 
@@ -57,7 +60,7 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
                 explode();
             }else
             {
-                counter += dt;
+                counter += d;
                 float targetDirection =  (float)Math.toDegrees(Math.atan2(target.y - y, target.x - x));
                 rotation = targetDirection;
 
@@ -67,7 +70,6 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
 
             }
         }
-
     }
 
     private void explode()
@@ -101,7 +103,6 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
 
     @Override
     public void collision(Entity[] collisionList, int from, int to) {
-
         //destroy self when hp below zero
         if(hp <= 0)
         {
@@ -118,12 +119,12 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
             }
 
             //when asteroid collided with friendly entities
-            if(collisionList[i] instanceof FriendlyEntity)
+            if(collisionList[i] instanceof HarmfulEntity)
             {
-                //explosion effect
-                collisionList[i].hp -=hp;
+                collisionList[i].hp -= hp;
                 if(collisionList[i].hp < 0) collisionList[i].hp = 0;
                 hp = 0;
+                //explosion effect
                 explode();
                 break;
             }
@@ -132,6 +133,10 @@ public class Missile extends Entity implements HarmfulEntity, AIEntity{
 
     @Override
     public void borderCollision(boolean top, boolean bottom, boolean left, boolean right) {
-
+        if(target == null)
+        {
+            hp = 0;
+            alive = false;
+        }
     }
 }

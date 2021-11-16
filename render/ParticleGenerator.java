@@ -13,6 +13,8 @@ import java.util.Random;
 
 public class ParticleGenerator {
 
+    private static final double frameInterval = 1.0/60;
+
     class Particle
     {
         public long objectID;
@@ -143,6 +145,8 @@ public class ParticleGenerator {
      */
     public void tick(double dt)
     {
+        double dt1 = dt/frameInterval;
+
         //remove died particles
         for(int i = particleList.size() - 1; i >=0; i--)
         {
@@ -177,8 +181,8 @@ public class ParticleGenerator {
         for(Particle p : particleList)
         {
             p.span -= dt;
-            p.vx *= friction;
-            p.vy *= friction;
+            p.vx *= friction * dt1;
+            p.vy *= friction * dt1;
             p.x += p.vx;
             p.y +=p.vy;
 

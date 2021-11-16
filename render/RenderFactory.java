@@ -417,8 +417,15 @@ public class RenderFactory {
 
                 //render
                 p.obj.draw(canvas.getGraphicsContext2D());
+
             }
         }
+
+        //render score
+
+        canvas.getGraphicsContext2D().setFill(Color.BLACK);
+        canvas.getGraphicsContext2D().fillText("Survival Time: " + GameVariables.currentScore, 10, 30);
+        canvas.getGraphicsContext2D().fillText("Highest Survival Time: " + GameVariables.highestScore, 10, 60);
 
     }
 

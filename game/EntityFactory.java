@@ -171,6 +171,32 @@ public class EntityFactory {
         return m;
     }
 
+    /**
+     * create a new instance of friendly missile entity
+     * @param x missile x location
+     * @param y missile y location
+     * */
+    public FriendlyMissile makeFriendlyMissile(float x, float y)
+    {
+        FriendlyMissile m = new FriendlyMissile(x, y);
+        assignID(m);
+        return m;
+    }
+
+    /**
+     * create a new instance of hp block entity
+     * @param x x location
+     * @param y y location
+     * @param vx x velocity
+     * @param vy y velocity
+     * */
+    public HpBlock makeHpBlock(float x, float y, float vx, float vy)
+    {
+        HpBlock h = new HpBlock(x, y, vx, vy);
+        assignID(h);
+        return h;
+    }
+
     public ArrayList<Entity> getEntityList()
     {
         return objects;

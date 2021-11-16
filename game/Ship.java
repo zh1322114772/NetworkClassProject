@@ -47,13 +47,5 @@ public class Ship extends Entity implements FriendlyEntity{
         //ship died
         if(hp <= 0) return;
 
-        for(int i= from ; i < to; i++)
-        {
-            //when ship collided with harmful entities
-            if(collisionList[i] instanceof HarmfulEntity)
-            {
-                hp = (hp - collisionList[i].hp < 0) ? 0f : (hp - collisionList[i].hp);
-            }
-        }
     }
 }

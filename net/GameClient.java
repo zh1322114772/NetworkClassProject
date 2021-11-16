@@ -2,6 +2,7 @@ package b451_Project.net;
 
 import b451_Project.game.*;
 import b451_Project.global.ConfigVariables;
+import b451_Project.global.GameVariables;
 import b451_Project.global.WindowMsgBox;
 import b451_Project.global.WindowVariables;
 import b451_Project.net.packets.*;
@@ -108,6 +109,10 @@ public class GameClient extends TCPClient{
                 tickObject2RenderObject.get(i).second = false;
             }
 
+            //update score
+            GameVariables.currentScore = tp.survivalTime;
+            GameVariables.highestScore = tp.highestSurvivalTime;
+
             //update render frame
             RenderFactory rf = WindowVariables.gameScene.getRenderFactory();
             for(Entity e : tp.entities)
@@ -122,8 +127,8 @@ public class GameClient extends TCPClient{
                     if(e instanceof Ship)
                     {
                         //particle effects
-                        Integer flame0 = rf.makeParticleGenerator(0.01f, 90, 10, 16, 4, 4, 4, Color.color(1, 0, 0, 0.5), 0.5f, -1, e.x, e.y, 0.98f, 2);
-                        Integer flame1 = rf.makeParticleGenerator(0.01f, 90, 7, 16, 4, 4, 4, Color.color(1, 1, 0, 0.5), 0.5f, -1, e.x, e.y, 0.98f, 2);
+                        Integer flame0 = rf.makeParticleGenerator(0.02f, 90, 10, 16, 4, 4, 4, Color.color(1, 0, 0, 0.5), 0.5f, -1, e.x, e.y, 0.98f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.02f, 90, 7, 16, 4, 4, 4, Color.color(1, 1, 0, 0.5), 0.5f, -1, e.x, e.y, 0.98f, 2);
                         ef.add(flame0);
                         ef.add(flame1);
 
@@ -138,6 +143,7 @@ public class GameClient extends TCPClient{
                         ef.add(flame0);
                         ef.add(flame1);
 
+                        //asteroid
                         id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.BROWN, 8, 40, 0, e.rotation, e.x, e.y);
                     }else if(e instanceof Missile)
                     {
@@ -147,7 +153,27 @@ public class GameClient extends TCPClient{
                         ef.add(flame0);
                         ef.add(flame1);
 
+                        //missile
                         id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.LIGHTGREY, 3, 30, 2, e.rotation, e.x, e.y);
+                    }else if(e instanceof FriendlyMissile)
+                    {
+                        Integer flame0 = rf.makeParticleGenerator(0.02f, e.rotation + 180, 15, 16, 4, 4, 4, Color.color(0.0, 0.1, 0.8, 0.5), 0.15f, -1, e.x, e.y, 0.98f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.02f, e.rotation + 180, 15, 16, 4, 4, 4, Color.color(0.4, 0.4, 0.8, 0.5), 0.15f, -1, e.x, e.y, 0.98f, 2);
+                        ef.add(flame0);
+                        ef.add(flame1);
+
+                        //friendly missile
+                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.LIGHTGREY, 3, 30, 2, e.rotation, e.x, e.y);
+                    }else if(e instanceof HpBlock)
+                    {
+                        Integer flame0 = rf.makeParticleGenerator(0.01f, 0, 180, 17, 8, 4, 6, Color.color(0.9, 0.3, 0.3, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
+                        Integer flame1 = rf.makeParticleGenerator(0.01f, 0, 180, 17, 8, 4, 6, Color.color(1, 0, 0, 0.5), 0.15f, -1, e.x, e.y, 0.8f, 2);
+                        ef.add(flame0);
+                        ef.add(flame1);
+
+                        //asteroid
+                        id = rf.makePolygon(-1, 1.0f/ ConfigVariables.GAME_TICK_RATE, Color.PINK, 4, 40, 0, e.rotation, e.x, e.y);
+
                     }
 
                     //add to hashmap
